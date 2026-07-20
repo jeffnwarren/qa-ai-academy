@@ -1,0 +1,32 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Lab: Node risk triage tests",
+      "type": "shell",
+      "command": "node --test",
+      "options": {
+        "cwd": "${workspaceFolder}/qa-ai-academy/labs/node-risk-triage"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Lab: Python claim audit tests",
+      "type": "shell",
+      "command": "python -m unittest",
+      "options": {
+        "cwd": "${workspaceFolder}/qa-ai-academy/labs/python-claim-audit"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Lab: Playwright reset flow tests",
+      "type": "shell",
+      "command": "npm test",
+      "options": {
+        "cwd": "${workspaceFolder}/qa-ai-academy/labs/playwright-reset-flow"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

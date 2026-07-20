@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.py[cod]
+node_modules/
+.pytest_cache/
+playwright-report/
+test-results/
+
+# Private commercial source books; retain citations and original notes only.
+qa-ai-academy/sources/*.pdf
