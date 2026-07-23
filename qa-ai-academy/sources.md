@@ -2,6 +2,16 @@
 
 Public source and provenance index. This file records how references inform the learning RPG without reproducing protected book content. Commercial books and game rulebooks are not distributed with this repository.
 
+## Creative Inspiration
+
+- Merle Rasmussen with Jayson Elliot and James Carpio, *Top Secret: New World Order*
+  - Official publisher page: <https://solariangames.com/>
+  - Provided early creative inspiration for the Academy's dossier presentation,
+    mission framing, and dice-based progression.
+  - QA-AI Academy is an original, independent educational project. It does not
+    reproduce the game's rules or content and is not affiliated with or endorsed
+    by its authors or publisher.
+
 ## AI Learning Sources
 
 - Chip Huyen, *AI Engineering: Building Applications with Foundation Models*
@@ -48,7 +58,7 @@ Primary learner persona: a manual or software tester learning practical AI workf
 
 - Mission 01, "First Contact"
   - AI concepts: LLM basics, tokens, context windows, automation bias.
-  - RPG function: recruit briefing and first field exercise.
+  - RPG function: opening briefing and first field exercise.
 - Mission 02, "The Briefing Room"
   - AI concepts: prompt anatomy, constraints, output format, assumptions, privacy boundaries.
   - RPG function: mission planning and controlled engagement.

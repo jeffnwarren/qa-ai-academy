@@ -1,0 +1,14 @@
+{
+  "name": "qa-ai-academy-gameplay-qa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "End-to-end accuracy and gameplay checks for the standalone QA-AI Academy.",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0"
+  }
+}

@@ -31,6 +31,10 @@ cd qa-ai-academy/labs/node-risk-triage
 
 Inspect `riskTriage.js` and `riskTriage.test.js` before editing. This lab has no third-party package dependencies, so `npm install` is unnecessary.
 
+Use only the supplied synthetic risk items. Do not replace them with customer
+records, private defect data, credentials, or other sensitive operational
+details.
+
 ## 3. Capture The Expected Failure
 
 ```bash

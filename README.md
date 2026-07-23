@@ -19,7 +19,7 @@ Open that file in a browser to use QA-AI Academy. It is a self-contained field k
 The mandatory campaign requires only `qa-ai-academy/qa_ai_academy.html` and access to an AI chatbot:
 
 1. Upload the dossier HTML to the chatbot for curriculum and case-file context.
-2. Send the AI Handler Launch Order shown in the dossier.
+2. Send the AI Learning Guide prompt shown in the dossier.
 3. Open the same HTML file in a browser for the interactive campaign, saved progress, Field Kit, and lab consoles.
 4. Complete Missions 01-13 in order. Missions 01-04 establish the core judgment habits; Missions 05-12 use the embedded case files and dependency-free lab harnesses; Mission 13 consolidates the work into a personal playbook.
 
@@ -64,7 +64,7 @@ Use `qa-ai-academy/AI_SESSION_MEMORY_PROTOCOL.md` when working with AI on the cu
 
 Use one chat for one QA-AI Academy playthrough. When you want to start over, click New Chat, paste in your standard starting prompt or campaign instructions, and begin again. Keep that reusable configuration prompt in a text file so every run can start from the same conditions.
 
-For academy testing, this makes playthroughs easier to compare: no hidden carry-over from earlier hints or mistakes, better simulation of a first-time recruit experience, and cleaner evidence about how the academy behaves from a fresh start.
+For academy testing, this makes playthroughs easier to compare: no hidden carry-over from earlier hints or mistakes, better simulation of a first-time learner experience, and cleaner evidence about how the academy behaves from a fresh start.
 
 Suggested Mission Reset Prompt:
 

@@ -2,6 +2,15 @@
 
 Maintainer manual test checklist for `qa_ai_academy.html`.
 
+## Automated Standalone Gameplay QA
+
+- Run `npm install` and `npx playwright install chromium` once from `qa/`.
+- Run `npm test` from `qa/` before release or after curriculum, gameplay, or
+  optional-lab changes.
+- See `qa/README.md` for scope, expected embedded-lab baselines, and failure artifacts.
+- Keep the manual checks below for source currency, visual judgment, keyboard behavior,
+  responsive layout, and other areas the automated suite does not claim to prove.
+
 ## Documentation Consistency
 
 - Confirm `README.md` labels the single-HTML Missions 01-13 route mandatory and the repository runtime labs optional.
@@ -22,7 +31,7 @@ Maintainer manual test checklist for `qa_ai_academy.html`.
 
 ## Save And Restore
 
-- Edit agent alias, cover identity, background, and field notes.
+- Edit display name/call sign, current role, experience/background, and field notes.
 - Reload the page and confirm values persist.
 - Change text size and theme, then reload and confirm preferences persist.
 - Export save data and confirm a dated `.json` file downloads.

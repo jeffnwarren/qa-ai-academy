@@ -48,6 +48,10 @@ python -m pip --version
 
 No third-party packages are required. Upgrading pip is optional and is not needed to run this lab. Python's official virtual-environment tutorial is <https://docs.python.org/3/tutorial/venv.html>.
 
+Use only the supplied synthetic claims. Do not replace them with customer
+records, private requirements, credentials, or other sensitive operational
+details.
+
 ## 3. Capture The Expected Failure
 
 Inspect `claim_audit.py` and `test_claim_audit.py`, then run:

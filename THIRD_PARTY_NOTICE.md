@@ -6,4 +6,12 @@ The project cites external books, standards, documentation, games, tools, and or
 
 Names such as Node.js, Python, Playwright, ChatGPT, ISTQB, NIST, OWASP, and WCAG belong to their respective owners. Reference to a name does not imply sponsorship, endorsement, certification, or affiliation.
 
+*Top Secret: New World Order*, by Merle Rasmussen with Jayson Elliot and James
+Carpio, provided early creative inspiration for the Academy's dossier
+presentation, mission framing, and dice-based progression. QA-AI Academy is an
+original, independent educational project. It does not reproduce that game's
+rules or content and is not affiliated with or endorsed by its authors,
+publisher, or rights holders. The game's title and associated marks belong to
+their respective owners.
+
 Commercial PDFs and other non-redistributable source material must not be committed, attached to issues, or included in release archives. Contributors should preserve citations and canonical links instead of copying protected material.

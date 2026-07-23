@@ -13,7 +13,7 @@ The complete 13-mission campaign is contained in `qa-ai-academy/qa_ai_academy.ht
 The standalone path includes:
 
 - mission progression and debrief gates;
-- the AI Handler Launch Order;
+- the AI Learning Guide;
 - embedded curriculum references and standing orders;
 - editable case and lab working files;
 - dependency-free Node-equivalent, browser-evidence, and Python-equivalent harnesses;
@@ -43,7 +43,7 @@ The JavaScript exercises execute editable synthetic code in the local page. The 
 
 `CONTENT_VERSION` is 11. Persisted state includes:
 
-- agent identity and preferences;
+- learner profile and preferences;
 - mission statuses, debriefs, self-ratings, and derived points;
 - Field Notes, Evidence Board items, and Prompt Notebook entries;
 - Field Kit working-file overrides and the selected file;
@@ -62,7 +62,7 @@ Every mission preserves this sequence:
 5. Debrief
 6. Completion criteria
 
-Missions unlock in order. Completion requires substantive debrief responses and awards five clearance points. Missions 01-04 establish prompting, assumption, risk, and evaluation habits. Missions 05-12 use the embedded Field Kit for grounded review, editing, standing instructions, debugging, browser evidence, claim classification, role separation, and memory discipline. Mission 13 consolidates the campaign into reusable tradecraft.
+Missions unlock in order. Completion requires substantive debrief responses and awards five progress points. Missions 01-04 establish prompting, assumption, risk, and evaluation habits. Missions 05-12 use the embedded Field Kit for grounded review, editing, standing instructions, debugging, browser evidence, claim classification, role separation, and memory discipline. Mission 13 consolidates the campaign into reusable tradecraft.
 
 ## Evidence Boundaries
 
