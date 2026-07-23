@@ -41,14 +41,17 @@ async function seedAllMissionsAvailable(page) {
   await page.goto(appUrl);
   await page.evaluate(({ storageKey, missionIds }) => {
     const missions = Object.fromEntries(missionIds.map(id => [id, 'current']));
-    localStorage.setItem(storageKey, JSON.stringify({ contentVersion: 11, missions }));
+    localStorage.setItem(storageKey, JSON.stringify({ contentVersion: 12, missions }));
   }, { storageKey: STORAGE_KEY, missionIds: MISSIONS.map(mission => mission.id) });
   await page.reload();
 }
 
 test.beforeEach(async ({ page }) => {
   await page.goto(appUrl);
-  await page.evaluate(storageKey => localStorage.removeItem(storageKey), STORAGE_KEY);
+  await page.evaluate(storageKey => {
+    localStorage.removeItem(storageKey);
+    localStorage.removeItem('icon_dossier_v1');
+  }, STORAGE_KEY);
   await page.reload();
 });
 
@@ -59,7 +62,7 @@ test('first run presents a safe, playable 13-mission campaign', async ({ page })
   await expect(page.getByText(/use only synthetic, public, or explicitly approved non-sensitive data/i)).toBeVisible();
 
   await openMissions(page);
-  const roster = page.locator('.mission-item');
+  const roster = page.locator('#mission-roster .mission-item');
   await expect(roster).toHaveCount(13);
   await expect(page.locator('#item-m1')).toBeEnabled();
 
@@ -138,6 +141,9 @@ test('a learner can complete all missions in order and retain progress', async (
   }
 
   await expect(page.locator('#current-die')).toHaveText('d12');
+  await page.locator('#item-m13').click();
+  await page.getByRole('button', { name: 'Return to dossier' }).click();
+  await expect(page.getByRole('tab', { name: 'Dossier' })).toHaveAttribute('aria-selected', 'true');
   await page.reload();
   await openMissions(page);
   await expect(page.locator('.mission-status.complete')).toHaveCount(MISSIONS.length);
@@ -151,7 +157,7 @@ test('profile, notes, and campaign style survive reload', async ({ page }) => {
   await page.locator('#field-notes').fill('Verify claims against current evidence.');
 
   await page.getByRole('button', { name: 'Options' }).click();
-  await page.getByRole('button', { name: 'Manual' }).click();
+  await page.getByRole('button', { name: 'Direct' }).click();
   await page.reload();
 
   await expect(page.getByLabel('Display name / call sign')).toHaveValue('Alex');
@@ -178,4 +184,122 @@ test('embedded lab harnesses report their intentional starting evidence', async 
   await page.getByRole('button', { name: 'Run Python-equivalent tests' }).click();
   await expect(page.locator('#python-output')).toContainText('2/5');
   await expect(page.locator('#python-output')).toContainText('FAIL');
+});
+
+test('completion offers direct continuation to the newly unlocked mission', async ({ page }) => {
+  await openMissions(page);
+  await page.locator('#item-m1').click();
+  for (const answer of await page.locator('[data-debrief-id]').all()) {
+    await answer.fill('A sufficiently detailed evidence-based reflection.');
+  }
+  await page.locator('#m1-complete-btn').click();
+  await page.getByRole('button', { name: /Continue to next mission/i }).click();
+  await expect(page.locator('.mission-title')).toHaveText('"The Briefing Room"');
+});
+
+test('optional advanced modules preserve structure and save completion independently', async ({ page }) => {
+  await page.getByRole('tab', { name: 'Advanced' }).click();
+  await expect(page.locator('#advanced-roster .mission-item')).toHaveCount(8);
+
+  for (let index = 0; index < 8; index += 1) {
+    await page.locator(`#advanced-item-a${index + 1}`).click();
+    await expect(page.locator('.section-label')).toHaveCount(6);
+    await expect(page.locator('[data-debrief-id]')).toHaveCount(2);
+    await page.getByRole('button', { name: /Back to advanced modules/i }).click();
+  }
+
+  await page.locator('#advanced-item-a1').click();
+  for (const answer of await page.locator('[data-debrief-id]').all()) {
+    await answer.fill('A bounded reflection supported by observable evidence.');
+  }
+  await page.locator('#a1-advanced-complete-btn').click();
+  await expect(page.locator('#a1-advanced-gate-note')).toContainText('Mandatory campaign points are unchanged');
+  await expect(page.locator('#pts-display')).toHaveText('0');
+
+  await page.reload();
+  await page.getByRole('tab', { name: 'Advanced' }).click();
+  await expect(page.locator('#advanced-status-a1')).toHaveClass(/complete/);
+});
+
+test('save export and import restore learner data', async ({ page }) => {
+  await page.getByLabel('Display name / call sign').fill('Export Agent');
+  await page.getByRole('tab', { name: 'Field Notes' }).click();
+  await page.locator('#field-notes').fill('Portable synthetic evidence note.');
+  await page.getByRole('button', { name: 'Options' }).click();
+
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: /Export save file/i }).click();
+  const download = await downloadPromise;
+  const savePath = await download.path();
+
+  await page.locator('.drawer-close').click();
+  await page.getByRole('tab', { name: 'Dossier' }).click();
+  await page.getByLabel('Display name / call sign').fill('Changed');
+  await page.getByRole('button', { name: 'Options' }).click();
+  await page.locator('#import-file').setInputFiles(savePath);
+
+  await expect(page.getByLabel('Display name / call sign')).toHaveValue('Export Agent');
+  await page.getByRole('tab', { name: 'Field Notes' }).click();
+  await expect(page.locator('#field-notes')).toHaveValue('Portable synthetic evidence note.');
+});
+
+test('reset can be cancelled and confirmed without stale learner state', async ({ page }) => {
+  await page.getByLabel('Display name / call sign').fill('Keep Me');
+  await page.getByRole('button', { name: 'Options' }).click();
+
+  page.once('dialog', dialog => dialog.dismiss());
+  await page.getByRole('button', { name: /Start over/i }).click();
+  await expect(page.getByLabel('Display name / call sign')).toHaveValue('Keep Me');
+
+  page.once('dialog', dialog => dialog.accept());
+  await page.getByRole('button', { name: /Start over/i }).click();
+  await expect(page.getByLabel('Display name / call sign')).toHaveValue('');
+  await expect(page.locator('#pts-display')).toHaveText('0');
+});
+
+test('legacy saves migrate to current style and retain derived progress', async ({ page }) => {
+  await page.evaluate(() => {
+    localStorage.removeItem('qa_ai_academy_v1');
+    localStorage.setItem('icon_dossier_v1', JSON.stringify({
+      contentVersion: 11,
+      agentName: 'Legacy Learner',
+      campaignStyle: 'field',
+      pts: 999,
+      missions: { m1: 'complete', m2: 'current' },
+    }));
+  });
+  await page.reload();
+
+  await expect(page.getByLabel('Display name / call sign')).toHaveValue('Legacy Learner');
+  await expect(page.locator('#pts-display')).toHaveText('5');
+  await page.getByRole('button', { name: 'Options' }).click();
+  await expect(page.getByRole('button', { name: 'Direct' })).toHaveClass(/selected/);
+});
+
+test('keyboard focus, maximum text size, narrow layout, and theme persist', async ({ page }) => {
+  const dossierTab = page.getByRole('tab', { name: 'Dossier' });
+  await dossierTab.focus();
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('tab', { name: 'Missions' })).toBeFocused();
+  const outline = await page.getByRole('tab', { name: 'Missions' }).evaluate(
+    element => getComputedStyle(element).outlineStyle
+  );
+  expect(outline).not.toBe('none');
+
+  await page.setViewportSize({ width: 320, height: 800 });
+  await page.getByRole('button', { name: 'Options' }).click();
+  for (let index = 0; index < 7; index += 1) {
+    await page.locator('.sz-btn[title="Larger"]').click();
+  }
+  await page.getByRole('button', { name: 'Light' }).click();
+  await page.locator('.drawer-close').click();
+  const hasDocumentOverflow = await page.evaluate(
+    () => document.documentElement.scrollWidth > document.documentElement.clientWidth
+  );
+  expect(hasDocumentOverflow).toBeFalsy();
+
+  await page.reload();
+  await expect(page.locator('body')).toHaveClass(/light/);
+  await page.getByRole('button', { name: 'Options' }).click();
+  await expect(page.locator('#font-display')).toHaveText('22');
 });

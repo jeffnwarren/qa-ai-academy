@@ -51,9 +51,16 @@ Failure artifacts are written to `test-results`. The HTML report is written to
   curriculum manifest in the spec.
 - Every debrief response is required, including the fifth question in Missions
   04, 09, 11, and 13.
+- Mission completion can continue directly to the next unlocked mission.
 - All missions unlock and complete sequentially, award five points exactly
   once, reach 65 points, and persist after reload.
-- Learner profile, Field Notes, and Manual campaign style persist.
+- Eight optional advanced modules preserve the six-part learning structure,
+  save independently, and do not change mandatory points.
+- Learner profile, Field Notes, and Direct campaign style persist.
+- Export/import, reset cancellation/confirmation, and legacy migration preserve
+  or clear the intended state.
+- Keyboard focus, 320px layout, maximum text size, and theme persistence are
+  checked.
 - Embedded Node-, browser-, and Python-equivalent harnesses produce their
   documented intentional starting evidence.
 - Optional authentic Node, Python, and Playwright labs produce their documented
@@ -73,8 +80,9 @@ source currency still requires periodic human review of `sources.md` and
 ```text
 Changed: Added a dedicated Playwright QA package and corrected the debrief gate
 to require every rendered question.
-Verified: `npm.cmd test` passed all 9 Playwright scenarios on 2026-07-23
-(9 passed in 10.2 seconds). This included the complete 13-mission progression,
+Verified: `npm.cmd test` passed all 15 Playwright scenarios on 2026-07-23
+(15 passed in 15.3 seconds). This included the complete 13-mission progression,
+all eight Advanced modules, expanded persistence/accessibility/layout checks,
 all three optional-lab starting failures, and all three isolated repair paths.
 Expected failures: The embedded lab implementations intentionally report failed
 cases, but the QA assertions around those documented baselines should pass.

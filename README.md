@@ -25,7 +25,7 @@ The mandatory campaign requires only `qa-ai-academy/qa_ai_academy.html` and acce
 
 Completing the embedded versions satisfies the full campaign. Node.js, Python, Playwright, VS Code, and a local copy of this repository are not required.
 
-Campaign style defaults to RPG-flavored handler briefings. Use Options -> Campaign style -> Manual if you want the more direct field-manual version.
+Campaign style defaults to Story briefings. Use Options -> Campaign style -> Direct if you want the same mission content without narrative briefings.
 
 ## What It Teaches
 
@@ -51,6 +51,25 @@ The Node and Python extensions intentionally fail at first. The Playwright exten
 When setup is confusing, ask the AI assistant for help using the local README and command output as context. The goal is not to browse randomly until something works; the goal is to practice asking for grounded setup help, then verifying the result.
 
 VS Code task definitions are included in `.vscode/tasks.json` for running the lab commands from the editor.
+
+## Optional Advanced Field Modules
+
+The standalone Academy also includes eight optional modules under the
+**Advanced** tab. They do not affect the 13 mandatory missions or campaign
+points:
+
+- supervised coding-agent work with Codex, VS Code, or another coding agent;
+- reusable prompts, `AGENTS.md`, skills, and plugin boundaries;
+- parallel-agent review and evidence-based consolidation;
+- tools, connectors, MCP, sandbox, and approval boundaries;
+- a synthetic issue-to-PR evidence loop;
+- multimodal screenshot review with browser verification;
+- synthetic QA-data analysis with deterministic metric checks;
+- evidence-driven model and tool selection.
+
+Codex is used as one concrete implementation, not as the learning objective.
+Product-specific controls and availability may change; the modules teach
+transferable context, authority, review, and verification patterns first.
 
 ## AI Testing Field Guide
 

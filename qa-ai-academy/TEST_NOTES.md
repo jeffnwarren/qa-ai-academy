@@ -27,7 +27,7 @@ Maintainer manual test checklist for `qa_ai_academy.html`.
 - Confirm clearance shows `d4`, points show `0`, Mission 01 is enabled, and Missions 02-13 are locked.
 - Confirm Options drawer opens and closes.
 - Confirm Field Kit opens, lists embedded case and lab files, and displays `case/README.md` by default.
-- Confirm Campaign style defaults to RPG, can switch to Manual, and updates mission briefings when a mission is open.
+- Confirm Campaign style defaults to Story, can switch to Direct, migrates older RPG/Manual saves, and updates mission briefings when a mission is open.
 
 ## Save And Restore
 
@@ -49,6 +49,18 @@ Maintainer manual test checklist for `qa_ai_academy.html`.
 - Confirm Mission 05 appears after the d4 intro arc and the roster continues through d12.
 - Confirm completing a mission twice does not double-award points.
 - Confirm a completed mission remains readable after reload.
+- Confirm mission completion offers a direct route to the newly unlocked
+  mission and Mission 13 returns to the dossier.
+
+## Optional Advanced Modules
+
+- Confirm all eight modules remain available without changing mission locks or
+  points.
+- Confirm every module preserves Objective, Concept, Hands-on exercise, Failure
+  mode, Debrief, and Completion criteria.
+- Confirm module reflections and completion persist after reload.
+- Confirm Codex-specific guidance links to current official documentation while
+  teaching a transferable workflow first.
 
 ## Learning And Safety Content
 

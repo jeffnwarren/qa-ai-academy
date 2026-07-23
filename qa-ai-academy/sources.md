@@ -52,6 +52,27 @@ Public source and provenance index. This file records how references inform the 
 
 Access date for the living references above: 2026-07-19. Prefer canonical links over copied snapshots unless a stable, redistributable version is needed for an offline exercise.
 
+## Codex And Agent-Workflow References
+
+The optional Advanced modules use Codex as one concrete implementation of
+transferable agent workflows. These product pages are living references and
+must be refreshed before product-specific instructions are released:
+
+- OpenAI Codex best practices: <https://learn.chatgpt.com/guides/best-practices>
+- Codex IDE extension: <https://learn.chatgpt.com/docs/codex/ide>
+- Custom instructions with `AGENTS.md`:
+  <https://learn.chatgpt.com/docs/agent-configuration/agents-md>
+- Build skills: <https://learn.chatgpt.com/docs/build-skills>
+- Subagents: <https://learn.chatgpt.com/docs/agent-configuration/subagents>
+- Agent approvals and security:
+  <https://learn.chatgpt.com/docs/agent-approvals-security>
+- Model Context Protocol: <https://learn.chatgpt.com/docs/extend/mcp>
+- GitHub integration: <https://learn.chatgpt.com/docs/third-party/github>
+
+Access date: 2026-07-23. These references support current product examples,
+not the underlying evidence, least-privilege, review, or verification
+principles.
+
 ## Mission Mapping
 
 Primary learner persona: a manual or software tester learning practical AI workflows. The curriculum favors verification, evidence, and human ownership over coding speed alone.
@@ -106,6 +127,25 @@ The dossier embeds the mandatory campaign versions of these exercises. The direc
   - Supports Mission 09 with an intentionally broken synthetic password-reset browser flow.
 - `labs/python-claim-audit`
   - Supports Mission 10 with an intentionally naive Python evidence classifier.
+
+## Optional Advanced Module Mapping
+
+- Supervised Coding Agent: bounded context, IDE/repository work, diff review,
+  command evidence, and human acceptance.
+- Reusable Instructions and Skills: prompt scope, `AGENTS.md`, skills, plugins,
+  triggers, and non-trigger cases.
+- Parallel Agent Review: independent read-heavy roles, coordination cost,
+  disagreement, and consolidation.
+- Tools, Connectors, and Permissions: sandbox, approvals, MCP capability
+  boundaries, least privilege, and untrusted connected content.
+- Issue-to-PR Evidence Loop: acceptance criteria, reproduction, bounded change,
+  tests, review packet, and publication authority.
+- Multimodal UI Evidence: screenshot observations, inference labels, browser
+  confirmation, and accessibility boundaries.
+- QA Data Analysis: synthetic structured data, denominator checks, deterministic
+  reproduction, and causal-claim limits.
+- Model and Tool Selection: evidence-driven choice across deterministic,
+  browsing, retrieval, image, and coding-agent capabilities.
 
 ## Memory And Documentation Mapping
 

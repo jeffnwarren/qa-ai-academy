@@ -249,6 +249,12 @@
   }
   .tab-btn:hover { color: var(--text); }
   .tab-btn.active { color: var(--green); border-bottom-color: var(--green); }
+  .tab-btn:focus-visible, .gear-btn:focus-visible, .drawer-close:focus-visible,
+  .save-btn:focus-visible, .complete-btn:focus-visible, .data-btn:focus-visible,
+  .theme-choice:focus-visible, .sz-btn:focus-visible, .mission-back:focus-visible {
+    outline: 2px solid var(--green);
+    outline-offset: 2px;
+  }
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
 
@@ -274,7 +280,6 @@
   .attr-name { font-family: var(--cond); font-size: 0.733rem; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 6px; }
   .attr-die { font-family: var(--mono); font-size: 1.467rem; color: var(--green); line-height: 1; margin-bottom: 4px; }
   .attr-desc { font-size: 0.667rem; color: var(--text-dim); line-height: 1.3; }
-  .attr-note { font-size: 0.667rem; color: var(--amber); margin-top: 4px; }
 
   /* ── Clearance ── */
   .clearance-track { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
@@ -307,8 +312,8 @@
   .mission-pts .pts-val { color: var(--amber); }
 
   /* ── Mission detail ── */
-  #mission-detail { display: none; }
-  #mission-detail.open { display: block; }
+  #mission-detail, #advanced-detail { display: none; }
+  #mission-detail.open, #advanced-detail.open { display: block; }
   .mission-back { background: none; border: 1px solid var(--border); color: var(--text-dim); font-family: var(--cond); font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; padding: 8px 14px; cursor: pointer; margin-bottom: 16px; transition: color 0.2s, border-color 0.2s; }
   .mission-back:hover { color: var(--text); border-color: var(--text-dim); }
   .mission-banner { background: var(--bg2); border: 1px solid var(--green-dim); padding: 18px 22px; margin-bottom: 16px; position: relative; overflow: hidden; }
@@ -325,7 +330,7 @@
   .objective-list { list-style: none; padding: 0; }
   .objective-list li { padding: 6px 0 6px 20px; position: relative; font-size: 0.933rem; border-bottom: 1px solid var(--border); color: var(--text); }
   .objective-list li:last-child { border-bottom: none; }
-  .objective-list li::before { content: '▸'; position: absolute; left: 0; color: var(--green); }
+  .objective-list li::before { content: '•'; position: absolute; left: 2px; color: var(--green); }
   .concept-block { margin-bottom: 16px; }
   .concept-block h4 { font-family: var(--cond); font-size: 0.933rem; font-weight: 600; letter-spacing: 1px; color: var(--text-bright); margin-bottom: 6px; }
   .concept-block p, .concept-block li { font-size: 0.933rem; color: var(--text); line-height: 1.65; }
@@ -438,6 +443,9 @@
     .kit-files { grid-template-columns: 1fr 1fr; }
     .reset-lab-row { grid-template-columns: 1fr; }
   }
+  @media (max-width: 360px) {
+    .attrs-grid { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
@@ -481,10 +489,10 @@
       <div class="opt-section">
         <div class="opt-section-title">Campaign style</div>
         <div class="theme-row">
-          <button class="theme-choice selected" id="style-cinematic" onclick="setCampaignStyle('cinematic')">RPG</button>
-          <button class="theme-choice" id="style-field" onclick="setCampaignStyle('field')">Manual</button>
+          <button class="theme-choice selected" id="style-story" onclick="setCampaignStyle('story')">Story</button>
+          <button class="theme-choice" id="style-direct" onclick="setCampaignStyle('direct')">Direct</button>
         </div>
-        <div class="import-note">RPG adds handler briefings. Manual keeps missions direct.</div>
+        <div class="import-note">Story adds narrative briefings. Direct keeps the learning content concise.</div>
       </div>
 
       <!-- Export / Import -->
@@ -527,6 +535,7 @@
   <div class="tabs" role="tablist" aria-label="Dossier sections">
     <button class="tab-btn active" id="tab-btn-dossier" role="tab" aria-selected="true" aria-controls="tab-dossier" onclick="showTab('dossier', this)">Dossier</button>
     <button class="tab-btn" id="tab-btn-missions" role="tab" aria-selected="false" aria-controls="tab-missions" onclick="showTab('missions', this)">Missions</button>
+    <button class="tab-btn" id="tab-btn-advanced" role="tab" aria-selected="false" aria-controls="tab-advanced" onclick="showTab('advanced', this)">Advanced</button>
     <button class="tab-btn" id="tab-btn-fieldkit" role="tab" aria-selected="false" aria-controls="tab-fieldkit" onclick="showTab('fieldkit', this)">Field Kit</button>
     <button class="tab-btn" id="tab-btn-evidence" role="tab" aria-selected="false" aria-controls="tab-evidence" onclick="showTab('evidence', this)">Evidence</button>
     <button class="tab-btn" id="tab-btn-notes" role="tab" aria-selected="false" aria-controls="tab-notes" onclick="showTab('notes', this)">Field Notes</button>
@@ -577,7 +586,6 @@
           <div class="attr-name">Critical Evaluation</div>
           <div class="attr-die" id="attr-critical-evaluation">d6</div>
           <div class="attr-desc">Skepticism: challenge confident output before using it</div>
-          <div class="attr-note">Bonus: prior AI exposure</div>
         </div>
         <div class="attr-card">
           <div class="attr-name">Prompt Design</div>
@@ -588,15 +596,14 @@
           <div class="attr-name">Workflow Integration</div>
           <div class="attr-die" id="attr-workflow-integration">d6</div>
           <div class="attr-desc">Practice integration: turn useful outputs into workflow habits</div>
-          <div class="attr-note">Bonus: manual testing background</div>
         </div>
         <div class="attr-card">
           <div class="attr-name">Human Judgment</div>
           <div class="attr-die" id="attr-human-judgment">d6</div>
           <div class="attr-desc">Judgment: know when AI helps, hurts, or needs a human stop</div>
-          <div class="attr-note">Bonus: manual testing background</div>
         </div>
       </div>
+      <p class="helper-text" style="margin-top:12px;">Dice show curriculum progression, not a formal assessment of your ability. They rise as you complete mandatory missions.</p>
     </div>
 
     <div class="panel">
@@ -628,6 +635,24 @@
     <div id="mission-detail">
       <button class="mission-back" onclick="closeMission()">&#8592; Back to missions</button>
       <div id="mission-content"></div>
+    </div>
+  </div>
+
+  <!-- ADVANCED TAB -->
+  <div class="tab-panel" id="tab-advanced" role="tabpanel" aria-labelledby="tab-btn-advanced">
+    <div id="advanced-list">
+      <div class="panel">
+        <div class="panel-title">Optional Advanced Field Modules</div>
+        <div class="intel-box">
+          <p>These modules extend the Academy into coding agents, reusable workflows, connected tools, collaborative review, and multimodal evidence. They are optional and do not affect mission locks, points, or completion of the 13-mission campaign.</p>
+          <p>Product interfaces change. Practice the transferable workflow first, use the named product as one concrete implementation, and verify current official documentation before relying on a product-specific control.</p>
+        </div>
+      </div>
+      <div id="advanced-roster"></div>
+    </div>
+    <div id="advanced-detail">
+      <button class="mission-back" onclick="closeAdvancedModule()">&#8592; Back to advanced modules</button>
+      <div id="advanced-content"></div>
     </div>
   </div>
 
@@ -831,7 +856,7 @@
 <script>
 const STORAGE_KEY = 'qa_ai_academy_v1';
 const LEGACY_STORAGE_KEYS = ['icon_dossier_v1'];
-const CONTENT_VERSION = 11;
+const CONTENT_VERSION = 12;
 const MISSION_ORDER = ['m1', 'm2', 'm3', 'm4', 'm5', 'm6', 'm7', 'm8', 'm9', 'm10', 'm11', 'm12', 'm13'];
 const MISSION_POINTS = 5;
 const MISSION_META = {
@@ -849,6 +874,80 @@ const MISSION_META = {
   m12: { num: '12', tier: 'd10', title: '"Memory Protocol"', next: 'Mission 13 - "Tradecraft Journal"' },
   m13: { num: '13', tier: 'd12', title: '"Tradecraft Journal"', next: '' },
 };
+const ADVANCED_MODULES = [
+  {
+    id: 'a1', title: 'Supervised Coding Agent', focus: 'Codex + VS Code',
+    concept: 'A coding agent can inspect files, edit code, and run commands. The durable workflow is product-independent: define the objective, supply current evidence, bound authority, inspect the diff, run verification, and retain the final decision. Codex supports this work through local surfaces including its IDE extension and CLI; interfaces may change, but the evidence loop should not.',
+    exercise: `Use the synthetic Node Risk Triage lab in Codex, VS Code, or another coding-agent environment. Supply the source, test, and exact failure. Ask the agent to restate goal, context, constraints, and done criteria before editing. Permit only the smallest ranking repair and the local test; prohibit installation, publication, secrets, and unrelated edits. Review the final diff and test output.`,
+    failure: 'Agent autopilot: a polished completion summary replaces diff inspection and verification.',
+    questions: ['What evidence and authority boundaries did you provide?', 'What did the diff and test prove, and what remained a human decision?'],
+    criteria: ['A synthetic coding task was bounded before editing', 'The diff and test output were reviewed', 'No publishing, secrets, or permission changes were delegated'],
+    reference: 'https://learn.chatgpt.com/docs/codex/ide',
+  },
+  {
+    id: 'a2', title: 'Reusable Instructions and Skills', focus: 'Prompts + AGENTS.md + skills',
+    concept: 'Use a prompt for one task, AGENTS.md for durable repository conventions, a skill for a reusable workflow with instructions and optional resources or scripts, and a plugin when that workflow needs distribution or bundled capabilities. A skill description should define narrow triggers and boundaries because Codex can invoke skills explicitly or when a task matches.',
+    exercise: `Draft an instruction-only skill named synthetic-bug-summary. Require evidence, assumption, severity rationale, next check, and synthetic-only input. Test one matching request and one request it should reject, such as publishing a real customer incident. Explain why the workflow belongs in a skill rather than a prompt or AGENTS.md.`,
+    failure: 'Universal instruction blob: every preference becomes global guidance and activates in the wrong context.',
+    questions: ['Why is a skill the correct scope for this workflow?', 'Which matching and non-matching cases tested its trigger?'],
+    criteria: ['Prompt, AGENTS.md, skill, and plugin scopes are distinguished', 'The skill has triggers, boundaries, output, and verification', 'A non-matching case does not activate it'],
+    reference: 'https://learn.chatgpt.com/docs/build-skills',
+  },
+  {
+    id: 'a3', title: 'Parallel Agent Review', focus: 'Subagents + consolidation',
+    concept: 'Subagents are useful for independent, read-heavy work such as exploration, test-gap review, or safety review. They consume additional resources, and parallel edits to shared files can create conflicts. Separate roles do not create truth; the main thread and human operator still need to consolidate evidence and resolve disagreement.',
+    exercise: `Give two agents or separated chats the same synthetic change. Assign one to test gaps and one to safety and permission risks. Require file or requirement evidence and prohibit edits. Compare results, identify at least one disagreement, and resolve it using the artifact or a test rather than majority vote.`,
+    failure: 'Consensus theater: multiple agents repeat the same plausible claim and agreement is mistaken for proof.',
+    questions: ['Why were these tasks independent enough to delegate?', 'What disagreement did evidence resolve?'],
+    criteria: ['Agents had distinct read-only scopes', 'Findings cite observable evidence', 'A human consolidated results and resolved disagreement'],
+    reference: 'https://learn.chatgpt.com/docs/agent-configuration/subagents',
+  },
+  {
+    id: 'a4', title: 'Tools, Connectors, and Permissions', focus: 'MCP + least privilege',
+    concept: 'A sandbox limits what an agent can technically access; an approval policy controls when it must stop and ask. MCP servers and connectors can expose readable resources and external actions, so connected content remains untrusted and read access must not silently become authority to write, delete, publish, or administer.',
+    exercise: `Classify this synthetic workflow: read three issue records, summarize duplicates, edit a local draft, send it to a team channel, delete obsolete issues, and change repository permissions. Label every step read-only, local write, external write, destructive, or administrative. Decide what may proceed, what requires approval, and what must be refused or done manually.`,
+    failure: 'Permission creep: access granted for context quietly becomes authority to change external state.',
+    questions: ['How did you classify each action?', 'Where did you require approval or refuse delegation?'],
+    criteria: ['Every action has an authority class', 'External writes and destructive actions stay under explicit human control', 'Connected content is treated as untrusted'],
+    reference: 'https://learn.chatgpt.com/docs/agent-approvals-security',
+  },
+  {
+    id: 'a5', title: 'Issue-to-PR Evidence Loop', focus: 'Git + GitHub workflow',
+    concept: 'A reviewable change follows issue, acceptance criteria, reproduction, bounded implementation, tests, diff review, and a human publication decision. Passing CI is evidence for recorded checks, not proof that the change is correct or safe to merge.',
+    exercise: `In a synthetic local repository, write a mock issue, reproduce it with a test, make one bounded branch change, and prepare—but do not publish—a PR description. Include root cause, changed behavior, verification, remaining risk, and reviewer questions. Do not push, open a PR, resolve comments, alter CI, or merge.`,
+    failure: 'Green-check shortcut: passing automation replaces acceptance-criteria and diff review.',
+    questions: ['How did the issue become testable acceptance criteria?', 'What must a reviewer still decide before publication or merge?'],
+    criteria: ['The issue has a reproducible case', 'The proposed diff and commit are scoped', 'The PR packet reports tests and remaining risk without publishing'],
+    reference: 'https://learn.chatgpt.com/docs/third-party/github',
+  },
+  {
+    id: 'a6', title: 'Multimodal UI Evidence', focus: 'Screenshots + browser evidence',
+    concept: 'A screenshot is evidence of one rendered state. It can reveal clipping, hierarchy, or inconsistent visible labels, but it cannot prove keyboard behavior, accessible names, hidden states, responsive coverage, or accessibility conformance.',
+    exercise: `Use two synthetic screenshots of this Academy at different widths. Ask an image-capable AI for observations, then label each as visible evidence, inference, or unsupported claim. Confirm at least one observation using the DOM or a browser interaction and record one accessibility question that remains manual.`,
+    failure: 'Screenshot omniscience: one image is treated as proof of behavior or conformance.',
+    questions: ['Which findings were visible evidence versus inference?', 'What did you verify through another channel?'],
+    criteria: ['Observations and inferences are separated', 'At least one finding is independently verified', 'No full accessibility or responsive-coverage claim is made'],
+    reference: 'https://www.w3.org/TR/WCAG22/',
+  },
+  {
+    id: 'a7', title: 'QA Data Analysis', focus: 'Structured data + deterministic checks',
+    concept: 'AI can cluster defects and draft charts quickly, but summaries inherit duplicates, missing data, inconsistent labels, and selection bias. Source rows remain the evidence. A pattern can guide investigation without proving a cause.',
+    exercise: `Create a small synthetic CSV with defect ID, area, severity, discovery stage, reopen count, and resolution time. Ask AI for one pattern and one data-quality concern. Recalculate one metric with a spreadsheet formula or deterministic script. Write a follow-up test and one conclusion the dataset cannot support.`,
+    failure: 'Dashboard certainty: a polished percentage becomes an unsupported causal story.',
+    questions: ['Which metric did you reproduce and from which rows?', 'What conclusion can the data not support?'],
+    criteria: ['Only synthetic data is used', 'One metric is independently reproduced', 'A pattern becomes a bounded follow-up test rather than a causal claim'],
+    reference: 'https://www.nist.gov/itl/ai-risk-management-framework',
+  },
+  {
+    id: 'a8', title: 'Model and Tool Selection', focus: 'Evidence-driven capability choice',
+    concept: 'Choose from the evidence target: deterministic scripts for repeatable calculations, browsing for current public sources, retrieval or connectors for authorized context, image analysis for visible states, and coding agents for repository work. More autonomy is not automatically better. Capabilities, model names, access, and pricing change.',
+    exercise: `Choose a tool for three synthetic cases: calculate a pass rate from supplied rows; check whether a public testing standard changed; repair a failing test in a local repository. For each, name context, authority, verification, privacy, and a lower-authority alternative. Reject at least one unnecessarily powerful option.`,
+    failure: 'Capability maximalism: the most autonomous tool is selected for every task.',
+    questions: ['How did the evidence target change your tool choice?', 'Which high-authority option did you reject and why?'],
+    criteria: ['Three cases receive reasoned tool choices', 'Current or private information uses an appropriate source path', 'At least one unnecessary high-authority option is rejected'],
+    reference: 'https://learn.chatgpt.com/guides/best-practices',
+  },
+];
 const EVIDENCE_STATUSES = ['unverified', 'supported', 'assumption', 'contradicted'];
 const PROMPT_CATEGORIES = ['brainstorm', 'investigate', 'verify', 'review', 'debug', 'handoff', 'other'];
 const FIELD_KIT_FILES = {
@@ -1033,25 +1132,31 @@ function defaultState() {
     pts: 0,
     missions: Object.fromEntries(MISSION_ORDER.map((id, index) => [id, index === 0 ? 'current' : 'locked'])),
     notes: '', debriefs: {}, selfRatings: {}, evidenceItems: [], promptNotebook: [],
+    advancedModules: Object.fromEntries(Array.from({ length: 8 }, (_, index) => ['a' + (index + 1), 'available'])),
     kitFiles: {}, selectedKitFile: 'case/README.md',
-    fontSize: 15, lightMode: false, campaignStyle: 'cinematic'
+    fontSize: 15, lightMode: false, campaignStyle: 'story'
   };
 }
 
 let state = defaultState();
 let activeMissionId = null;
+let activeAdvancedId = null;
 
 function migrateState(imported) {
   const base = defaultState();
   const source = imported && typeof imported === 'object' ? imported : {};
   const migrated = Object.assign({}, base, source);
   migrated.missions = Object.assign({}, base.missions, source.missions || {});
+  migrated.advancedModules = Object.assign({}, base.advancedModules, source.advancedModules || {});
   migrated.debriefs = Object.assign({}, source.debriefs || {});
   migrated.selfRatings = Object.assign({}, source.selfRatings || {});
   migrated.evidenceItems = sanitizeEvidenceItems(source.evidenceItems);
   migrated.promptNotebook = sanitizePromptNotebook(source.promptNotebook);
   migrated.kitFiles = source.kitFiles && typeof source.kitFiles === 'object' ? source.kitFiles : {};
   migrated.selectedKitFile = FIELD_KIT_FILES[source.selectedKitFile] !== undefined ? source.selectedKitFile : 'case/README.md';
+  if (source.campaignStyle === 'cinematic') migrated.campaignStyle = 'story';
+  if (source.campaignStyle === 'field') migrated.campaignStyle = 'direct';
+  if (!['story', 'direct'].includes(migrated.campaignStyle)) migrated.campaignStyle = 'story';
 
   ['dq1','dq2','dq3','dq4','dq5'].forEach((oldId, index) => {
     const newId = 'm1-q' + (index + 1);
@@ -1104,7 +1209,7 @@ function loadState() {
 
 function save() {
   state.contentVersion = CONTENT_VERSION;
-  if (!state.campaignStyle) state.campaignStyle = 'cinematic';
+  if (!['story', 'direct'].includes(state.campaignStyle)) state.campaignStyle = 'story';
   state.agentName  = document.getElementById('agent-name').value;
   state.agentCover = document.getElementById('agent-cover').value;
   state.agentBg    = document.getElementById('agent-bg').value;
@@ -1132,6 +1237,7 @@ function renderState() {
   document.getElementById('agent-bg').value    = state.agentBg;
   document.getElementById('field-notes').value = state.notes;
   renderMissionList();
+  renderAdvancedList();
   renderEvidenceBoard();
   renderPromptNotebook();
   renderFieldKit();
@@ -1310,18 +1416,18 @@ function applyTheme() {
 
 // ── Campaign style ──
 function setCampaignStyle(style) {
-  state.campaignStyle = style === 'field' ? 'field' : 'cinematic';
+  state.campaignStyle = style === 'direct' ? 'direct' : 'story';
   applyCampaignStyle();
   save();
   if (activeMissionId) openMission(activeMissionId);
 }
 
 function applyCampaignStyle() {
-  if (!state.campaignStyle) state.campaignStyle = 'cinematic';
-  const cinematic = document.getElementById('style-cinematic');
-  const field = document.getElementById('style-field');
-  if (cinematic) cinematic.classList.toggle('selected', state.campaignStyle === 'cinematic');
-  if (field) field.classList.toggle('selected', state.campaignStyle === 'field');
+  if (!['story', 'direct'].includes(state.campaignStyle)) state.campaignStyle = 'story';
+  const story = document.getElementById('style-story');
+  const direct = document.getElementById('style-direct');
+  if (story) story.classList.toggle('selected', state.campaignStyle === 'story');
+  if (direct) direct.classList.toggle('selected', state.campaignStyle === 'direct');
 }
 
 // ── Export ──
@@ -1374,6 +1480,12 @@ function resetDossier() {
   if (detail) detail.classList.remove('open');
   if (list) list.style.display = 'block';
   if (content) content.innerHTML = '';
+  const advancedDetail = document.getElementById('advanced-detail');
+  const advancedList = document.getElementById('advanced-list');
+  const advancedContent = document.getElementById('advanced-content');
+  if (advancedDetail) advancedDetail.classList.remove('open');
+  if (advancedList) advancedList.style.display = 'block';
+  if (advancedContent) advancedContent.innerHTML = '';
   renderState();
   clearEvidenceForm();
   clearPromptNotebookForm();
@@ -1811,6 +1923,93 @@ function updateMissionStatuses() {
   });
 }
 
+// ── Optional advanced modules ──
+function renderAdvancedList() {
+  const roster = document.getElementById('advanced-roster');
+  if (!roster) return;
+  roster.innerHTML = ADVANCED_MODULES.map((module, index) => {
+    const done = state.advancedModules[module.id] === 'complete';
+    return `
+      <button class="mission-item" id="advanced-item-${module.id}" type="button" onclick="openAdvancedModule('${module.id}')">
+        <div class="mission-header">
+          <div class="mission-status ${done ? 'complete' : 'current'}" id="advanced-status-${module.id}"></div>
+          <div class="mission-meta">
+            <div class="mission-num">Optional module ${String(index + 1).padStart(2, '0')} — ${module.focus}</div>
+            <div class="mission-name">${module.title}</div>
+          </div>
+          <div class="mission-pts">${done ? '<span class="pts-val">Complete</span>' : 'Available'}</div>
+        </div>
+      </button>`;
+  }).join('');
+}
+
+function openAdvancedModule(id) {
+  const module = ADVANCED_MODULES.find(item => item.id === id);
+  if (!module) return;
+  activeAdvancedId = id;
+  document.getElementById('advanced-list').style.display = 'none';
+  document.getElementById('advanced-detail').classList.add('open');
+  document.getElementById('advanced-content').innerHTML = advancedModuleShell(module);
+  populateAdvancedFields(id);
+}
+
+function closeAdvancedModule() {
+  save();
+  activeAdvancedId = null;
+  document.getElementById('advanced-list').style.display = 'block';
+  document.getElementById('advanced-detail').classList.remove('open');
+}
+
+function populateAdvancedFields(id) {
+  document.querySelectorAll('[data-debrief-id]').forEach(field => {
+    field.value = state.debriefs[field.dataset.debriefId] || '';
+  });
+  updateAdvancedGate(id);
+}
+
+function handleAdvancedInput(id) {
+  save();
+  updateAdvancedGate(id);
+}
+
+function advancedReady(id) {
+  const ids = Array.from(
+    document.querySelectorAll(`[data-debrief-id^="${id}-q"]`),
+    field => field.dataset.debriefId
+  );
+  return ids.length > 0 && ids.every(qid => (state.debriefs[qid] || '').trim().length >= 12);
+}
+
+function updateAdvancedGate(id) {
+  const button = document.getElementById(id + '-advanced-complete-btn');
+  const note = document.getElementById(id + '-advanced-gate-note');
+  if (!button) return;
+  const done = state.advancedModules[id] === 'complete';
+  const ready = advancedReady(id);
+  button.disabled = done || !ready;
+  button.textContent = done ? '✓ Optional module complete' : 'Mark optional module complete';
+  if (note) {
+    note.textContent = done
+      ? 'Reflection logged. Mandatory campaign points are unchanged.'
+      : ready
+        ? 'Debrief complete. Ready to log this optional module.'
+        : 'Complete all debrief answers to log this optional module.';
+  }
+}
+
+function completeAdvancedModule(id) {
+  if (state.advancedModules[id] === 'complete' || !advancedReady(id)) {
+    updateAdvancedGate(id);
+    return;
+  }
+  state.advancedModules[id] = 'complete';
+  save();
+  renderAdvancedList();
+  updateAdvancedGate(id);
+  const flash = document.getElementById(id + '-advanced-flash');
+  if (flash) flash.classList.add('show');
+}
+
 // ── Mission content ──
 const missions = {
   m1: buildMission1,
@@ -1870,6 +2069,16 @@ function completeMission(id) {
   const flash = document.getElementById(id + '-flash');
   if (flash) flash.classList.add('show');
   updateCompletionGate(id);
+}
+
+function continueAfterMission(id) {
+  const index = MISSION_ORDER.indexOf(id);
+  if (index >= 0 && index < MISSION_ORDER.length - 1) {
+    openMission(MISSION_ORDER[index + 1]);
+    return;
+  }
+  closeMission();
+  showTab('dossier', document.getElementById('tab-btn-dossier'));
 }
 
 function handleDebriefInput(id) {
@@ -1940,8 +2149,64 @@ function ratingBlock(id) {
     </div>`;
 }
 
+function advancedModuleShell(module) {
+  const done = state.advancedModules[module.id] === 'complete';
+  const questionFields = module.questions.map((question, index) => {
+    const qid = module.id + '-q' + (index + 1);
+    return `
+      <div class="debrief-question">
+        <div class="dq-q"><span class="dq-num">Q${index + 1}.</span> ${question}</div>
+        <div class="dq-answer-area"><textarea id="${qid}" data-debrief-id="${qid}" placeholder="Your answer..." oninput="handleAdvancedInput('${module.id}')"></textarea></div>
+      </div>`;
+  }).join('');
+  return `
+    <div class="mission-banner" data-code="${module.id.toUpperCase()}">
+      <div class="mission-tier">Optional advanced module — ${module.focus}</div>
+      <div class="mission-title">${module.title}</div>
+      <div class="mission-tagline">Apply a transferable workflow with explicit evidence and human control.</div>
+    </div>
+    <div class="section-block">
+      <div class="section-label"><span class="step-num">1</span>Objective</div>
+      <ul class="objective-list">
+        <li>Apply the workflow to synthetic or explicitly approved non-sensitive material</li>
+        <li>Keep authority and verification boundaries explicit</li>
+        <li>Produce one observable artifact and one verification result</li>
+      </ul>
+    </div>
+    <div class="section-block">
+      <div class="section-label"><span class="step-num">2</span>Concept</div>
+      <div class="concept-block"><p>${module.concept}</p></div>
+      <div class="callout"><strong>Current official reference:</strong> <a href="${module.reference}" target="_blank" rel="noopener noreferrer">${module.reference}</a>. Product interfaces and availability can change; verify the live page before publishing product-specific instructions.</div>
+    </div>
+    <div class="section-block">
+      <div class="section-label"><span class="step-num">3</span>Hands-on exercise</div>
+      <div class="activity-block"><div class="act-label">Controlled practice</div><p>${module.exercise}</p></div>
+    </div>
+    <div class="section-block">
+      <div class="section-label"><span class="step-num">4</span>Failure mode</div>
+      <div class="callout"><strong>${module.failure}</strong></div>
+    </div>
+    <div class="section-block">
+      <div class="section-label"><span class="step-num">5</span>Debrief</div>
+      <p class="helper-text">Answer each prompt to log the optional module. These reflections do not affect mandatory campaign points.</p>
+      ${questionFields}
+    </div>
+    <div class="section-block">
+      <div class="section-label"><span class="step-num">6</span>Completion criteria</div>
+      <ul class="objective-list">${listItems(module.criteria)}</ul>
+      <div class="completion-gate" id="${module.id}-advanced-gate-note">Complete all debrief answers to log this optional module.</div>
+      <button class="complete-btn" id="${module.id}-advanced-complete-btn" onclick="completeAdvancedModule('${module.id}')" ${done ? 'disabled' : ''}>
+        ${done ? '&#10003; Optional module complete' : 'Mark optional module complete'}
+      </button>
+      <div class="complete-flash ${done ? 'show' : ''}" id="${module.id}-advanced-flash">
+        <div class="flash-pts">&#10003;</div>
+        <p>Optional reflection logged. Mandatory campaign points are unchanged.</p>
+      </div>
+    </div>`;
+}
+
 function campaignBrief(id) {
-  if (state.campaignStyle === 'field') return '';
+  if (state.campaignStyle === 'direct') return '';
   const briefs = {
     m1: 'Handler says: before the first contact, learn the shape of the machine. A polished answer can still be a false trail.',
     m2: 'Handler says: a mission brief is a prompt with discipline. Set scope, constraints, format, and proof before the operation starts.',
@@ -2017,6 +2282,9 @@ function missionShell(mission) {
     <div class="complete-flash ${done ? 'show' : ''}" id="${mission.id}-flash">
       <div class="flash-pts">+5 pts</div>
       <p>Progress updated. ${completeText}</p>
+      <button class="save-btn" type="button" onclick="continueAfterMission('${mission.id}')">
+        ${meta.next ? 'Continue to next mission &#8594;' : 'Return to dossier'}
+      </button>
     </div>
   </div>
   `;

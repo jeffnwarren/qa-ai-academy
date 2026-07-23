@@ -19,6 +19,8 @@ The standalone path includes:
 - dependency-free Node-equivalent, browser-evidence, and Python-equivalent harnesses;
 - Evidence Board, Field Notes, and Prompt Notebook;
 - local save, export, import, and reset behavior.
+- eight optional advanced modules with independent saved reflections and no
+  effect on mandatory mission progression or points.
 
 Completing the embedded work satisfies the full campaign. The browser path does not require the repository, VS Code, Node.js, Python, Playwright, package installation, a server, or internet access after the HTML is available. An AI chatbot is required for the guided AI-learning interactions, but no provider-specific API integration is built into the dossier.
 
@@ -41,10 +43,11 @@ The JavaScript exercises execute editable synthetic code in the local page. The 
 
 ## Current State Model
 
-`CONTENT_VERSION` is 11. Persisted state includes:
+`CONTENT_VERSION` is 12. Persisted state includes:
 
 - learner profile and preferences;
 - mission statuses, debriefs, self-ratings, and derived points;
+- optional advanced-module completion state and reflections;
 - Field Notes, Evidence Board items, and Prompt Notebook entries;
 - Field Kit working-file overrides and the selected file;
 - theme, text size, and campaign style.
