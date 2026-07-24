@@ -530,6 +530,7 @@
         <div class="import-note">Export before starting over if you want an archive. Reset clears only this browser's local dossier.</div>
         <div class="opt-feedback" id="import-feedback" role="status" aria-live="polite"></div>
       </div>
+      <p class="import-note" id="academy-version-marker">Academy content version 13</p>
 
     </div>
   </div>
@@ -566,7 +567,7 @@
       <ol class="onboarding-steps"><li>Keep the Academy open</li><li>Complete one mission at a time</li><li>Save evidence before trusting AI output</li></ol>
       <div class="evidence-actions">
         <button class="save-btn" id="onboarding-primary" type="button" onclick="continueCampaign()">Begin Mission 01</button>
-        <button class="save-btn" type="button" onclick="document.getElementById('ai-coach-options').focus()">How to use an AI coach</button>
+        <button class="save-btn" type="button" onclick="navigateTo('fieldkit', 'ai-coach-options')">How to use an AI coach</button>
       </div>
     </section>
     <div class="panel">
@@ -654,7 +655,7 @@
   <!-- MISSIONS TAB -->
   <div class="tab-panel" id="tab-missions" role="tabpanel" aria-labelledby="tab-btn-missions">
     <div id="mission-list">
-      <div class="panel-title" style="padding:16px 0 12px;border-bottom:1px solid var(--border);margin-bottom:16px;">Active mission roster</div>
+      <h2 class="panel-title" id="mission-roster-heading" tabindex="-1" style="padding:16px 0 12px;border-bottom:1px solid var(--border);margin-bottom:16px;">Active mission roster</h2>
       <div id="mission-roster"></div>
     </div>
 
@@ -765,7 +766,7 @@
           </div>
           <div>
             <label for="evidence-status">Status</label>
-            <select id="evidence-status">
+            <select id="evidence-status" onchange="clearEvidenceValidation()">
               <option value="unverified">Unverified</option>
               <option value="supported">Supported</option>
               <option value="assumption">Assumption</option>
@@ -789,12 +790,12 @@
         </div>
         <div>
           <label for="evidence-evidence">Evidence</label>
-          <textarea id="evidence-evidence" placeholder="What requirement, file, command output, test, or observation supports or challenges it?"></textarea>
+          <textarea id="evidence-evidence" aria-describedby="evidence-validation" oninput="clearEvidenceValidation()" placeholder="What requirement, file, command output, test, or observation supports or challenges it?"></textarea>
         </div>
         <div class="field-row">
           <div>
             <label for="evidence-source">Source</label>
-            <input type="text" id="evidence-source" placeholder="e.g. Mission 04 debrief, README, node --test">
+            <input type="text" id="evidence-source" aria-describedby="evidence-validation" oninput="clearEvidenceValidation()" placeholder="e.g. Mission 04 debrief, README, node --test">
           </div>
           <div>
             <label for="evidence-next-check">Next check</label>
@@ -809,7 +810,9 @@
           <button class="save-btn" type="submit" id="evidence-save-btn">Add evidence</button>
           <button class="save-btn" type="button" onclick="clearEvidenceForm()">Clear form</button>
         </div>
+        <p class="notebook-feedback" id="evidence-validation" role="status" aria-live="polite"></p>
       </form>
+      <p class="helper-text"><strong>Mission 13 source ledger:</strong> use case or lab <code>source-ledger</code>. Record title, organization, version or publication date, canonical URL, access date, exact supported claim or practice, whether it is a requirement, guidance, or learner inference, and the next currency check across Source, Evidence, Human decision, and Next check.</p>
     </div>
 
     <div class="panel">
@@ -1557,12 +1560,37 @@ async function submitResetLab() {
   catch(e) { result.textContent = 'App error: ' + e.message; }
 }
 
+function resetLabSemanticChecks(root = document) {
+  const input = root.querySelector('#reset-email');
+  const button = root.querySelector('.reset-lab-row button');
+  const result = root.querySelector('#reset-result');
+  const label = input && (
+    (input.id && root.querySelector(`label[for="${CSS.escape(input.id)}"]`)) ||
+    input.closest('label') ||
+    input.getAttribute('aria-label')?.trim() ||
+    (input.getAttribute('aria-labelledby') || '').split(/\s+/).some(id => root.getElementById(id)?.textContent.trim())
+  );
+  const buttonName = button && (button.getAttribute('aria-label') || button.textContent).trim();
+  const resultStatus = result && (
+    result.getAttribute('role') === 'status' ||
+    ['polite', 'assertive'].includes(result.getAttribute('aria-live'))
+  );
+  return [
+    ['email control exists and has an associated label', Boolean(input && label)],
+    ['submit control exists and has a name', Boolean(button && buttonName)],
+    ['result region exists and exposes status semantics', Boolean(result && resultStatus)],
+  ];
+}
+
 async function runBrowserLab() {
   const output = document.getElementById('browser-output');
   try {
     const known = await resetMessage('agent@example.test');
     const unknown = await resetMessage('unknown@example.test');
-    const checks = [['named controls and status semantics are present', true], ['known and unknown responses match', known === unknown], ['unknown response hides account existence', !/no account found/i.test(unknown)]];
+    const checks = resetLabSemanticChecks().concat([
+      ['known and unknown responses match', known === unknown],
+      ['unknown response hides account existence', !/no account found/i.test(unknown)],
+    ]);
     const passed = checks.filter(item => item[1]).length;
     output.textContent = checks.map(([name, ok]) => `${ok ? 'PASS' : 'FAIL'} ${name}`).join('\n') + `\n\nObserved unknown response: "${unknown}"\n${passed}/${checks.length} checks passed. Manual keyboard, visual, and comprehension checks remain.`;
     recordLabResult('browserResetRecon', 'm9', passed, checks.length, output.textContent);
@@ -1626,6 +1654,19 @@ function prefillLabEvidence(id) {
   document.getElementById('evidence-status').value = result.status === 'passed' ? 'supported' : 'contradicted';
   document.getElementById('evidence-next-check').value = 'Review the result and decide whether to repair or retain evidence.';
   document.getElementById('evidence-human-decision').value = 'Learner review pending.';
+  document.getElementById('evidence-title').focus();
+}
+
+function prefillSourceLedgerEvidence() {
+  navigateTo('evidence');
+  clearEvidenceForm();
+  document.getElementById('evidence-mission').value = 'm13';
+  document.getElementById('evidence-case').value = 'source-ledger';
+  document.getElementById('evidence-status').value = 'unverified';
+  document.getElementById('evidence-source').placeholder = 'Organization; version/date; canonical URL; access date';
+  document.getElementById('evidence-evidence').placeholder = 'Exact claim or practice supported and its provenance';
+  document.getElementById('evidence-human-decision').placeholder = 'Requirement, guidance, or learner inference; planned use';
+  document.getElementById('evidence-next-check').placeholder = 'When and how will you check currency again?';
   document.getElementById('evidence-title').focus();
 }
 
@@ -1811,8 +1852,28 @@ function evidenceValue(id) {
   return el ? el.value.trim() : '';
 }
 
+function clearEvidenceValidation() {
+  const message = document.getElementById('evidence-validation');
+  if (message) message.textContent = '';
+  ['evidence-evidence', 'evidence-source'].forEach(id => {
+    const field = document.getElementById(id);
+    if (field) field.removeAttribute('aria-invalid');
+  });
+}
+
 function saveEvidenceItem(event) {
   if (event) event.preventDefault();
+  clearEvidenceValidation();
+  if (evidenceValue('evidence-status') === 'supported') {
+    const missing = ['evidence-evidence', 'evidence-source'].filter(id => !evidenceValue(id));
+    if (missing.length) {
+      const message = document.getElementById('evidence-validation');
+      if (message) message.textContent = 'Supported records require both evidence and a source.';
+      missing.forEach(id => document.getElementById(id).setAttribute('aria-invalid', 'true'));
+      document.getElementById(missing[0]).focus();
+      return;
+    }
+  }
   const id = evidenceValue('evidence-id') || createEvidenceId();
   const item = {
     id,
@@ -1852,6 +1913,7 @@ function editEvidenceItem(index) {
   document.getElementById('evidence-case').value = item.caseId || '';
   document.getElementById('evidence-human-decision').value = item.humanDecision || '';
   document.getElementById('evidence-save-btn').textContent = 'Update evidence';
+  clearEvidenceValidation();
   document.getElementById('evidence-title').focus();
 }
 
@@ -1873,6 +1935,7 @@ function clearEvidenceForm() {
   document.getElementById('evidence-status').value = 'unverified';
   document.getElementById('evidence-mission').value = '';
   document.getElementById('evidence-save-btn').textContent = 'Add evidence';
+  clearEvidenceValidation();
 }
 
 function renderEvidenceBoard() {
@@ -2429,9 +2492,19 @@ function missionReady(id) {
   const evidenceReady = labMap[id] ? Boolean(state.labResults[labMap[id]] || linked.length) : true;
   const capstoneReady = id !== 'm13' || (
     state.promptNotebook.length >= 3 &&
-    linked.filter(item => /source|ledger/i.test(`${item.caseId} ${item.title} ${item.source}`)).length >= 2
+    linked.filter(qualifiesSourceLedger).length >= 2
   );
   return activitiesReady && debriefReady && evidenceReady && capstoneReady;
+}
+
+function qualifiesSourceLedger(item) {
+  return Boolean(
+    item && item.mission === 'm13' && item.caseId === 'source-ledger' &&
+    String(item.title || '').trim() &&
+    String(item.source || '').trim() &&
+    String(item.evidence || '').trim() &&
+    String(item.nextCheck || '').trim()
+  );
 }
 
 function updateCompletionGate(id) {
@@ -2645,6 +2718,7 @@ function missionShell(mission) {
       <button class="save-btn" type="button" onclick="navigateTo('evidence')">Open Evidence Board</button>
       <button class="save-btn" type="button" onclick="navigateTo('notes')">Open Field Notes</button>
       <button class="save-btn" type="button" onclick="navigateTo('notes','notebook-title')">Open Prompt Notebook</button>
+      ${mission.id === 'm13' ? '<button class="save-btn" type="button" onclick="prefillSourceLedgerEvidence()">Add source-ledger evidence</button>' : ''}
     </div>
     <div class="case-file-select">${Object.keys(FIELD_KIT_FILES).map((path, index) => `<label><input type="checkbox" class="case-file-copy-choice" value="${escapeHtml(path)}"> ${escapeHtml(path)}</label>${(index + 1) % 1 === 0 ? '<br>' : ''}`).join('')}</div>
     <div class="notebook-feedback mission-copy-feedback" role="status" aria-live="polite"></div>
@@ -3555,7 +3629,10 @@ function continueCampaign() {
   const status = currentMissionStatus();
   if (status.campaignComplete) {
     showTab('missions', document.getElementById('tab-btn-missions'));
-    document.getElementById('mission-roster').focus({ preventScroll:true });
+    activeMissionId = null;
+    document.getElementById('mission-list').style.display = 'block';
+    document.getElementById('mission-detail').classList.remove('open');
+    document.getElementById('mission-roster-heading').focus({ preventScroll:true });
     return;
   }
   showTab('missions', document.getElementById('tab-btn-missions'));
@@ -3628,6 +3705,25 @@ function saveTokenObservation(value) {
   save();
 }
 
+function evidenceReportEntry(item) {
+  const field = (label, value, fallback = 'Not recorded') =>
+    `<dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value || fallback)}</dd>`;
+  return `<article class="evidence-record">
+    <h3>${escapeHtml(item.title || 'Untitled evidence')}</h3>
+    <dl>
+      ${field('Mission', item.mission ? missionLabel(item.mission) : 'Unassigned')}
+      ${field('Case or lab', item.caseId)}
+      ${field('Status', item.status)}
+      ${field('Claim', item.claim)}
+      ${field('Evidence', item.evidence)}
+      ${field('Source', item.source)}
+      ${field('Human decision', item.humanDecision)}
+      ${field('Next check', item.nextCheck)}
+      ${field('Updated', formatEvidenceDate(item.updatedAt))}
+    </dl>
+  </article>`;
+}
+
 function exportLearningReport() {
   save();
   const statusList = MISSION_ORDER.map(id => {
@@ -3638,11 +3734,11 @@ function exportLearningReport() {
       <p>Status: ${state.missions[id] === 'complete' ? 'Learner-attested complete' : 'Incomplete'}</p>
       <h3>Activity attestations and observations</h3><ul>${Object.entries(attestations).map(([key,value]) => `<li>Activity ${escapeHtml(key.toUpperCase())}: ${value ? 'recorded' : 'not recorded'}</li>`).join('') || '<li>None recorded.</li>'}</ul>
       ${answers.map(([key,value]) => `<h3>${escapeHtml(key)}</h3><p>${escapeHtml(value)}</p>`).join('')}
-      ${evidence.map(item => `<h3>Linked evidence: ${escapeHtml(item.title)}</h3><p>${escapeHtml(item.evidence)}</p><p>Human decision: ${escapeHtml(item.humanDecision)}</p>`).join('')}</section>`;
+      ${evidence.map(evidenceReportEntry).join('')}</section>`;
   }).join('');
   const labHtml = Object.values(state.labResults).map(item => `<li>${escapeHtml(item.caseId)}: ${item.passed}/${item.total}, ${escapeHtml(item.status)} — ${escapeHtml(item.summary)}</li>`).join('');
   const report = `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>QA-AI Academy Learning Report</title>
-  <style>body{font:16px/1.55 system-ui;max-width:900px;margin:auto;padding:2rem;color:#17202a}section{border-top:1px solid #aaa;margin-top:2rem}pre{white-space:pre-wrap}@media print{button{display:none}}</style>
+  <style>body{font:16px/1.55 system-ui;max-width:900px;margin:auto;padding:2rem;color:#17202a}section{border-top:1px solid #aaa;margin-top:2rem}.evidence-record{border:1px solid #bbb;padding:1rem;margin:1rem 0}dt{font-weight:700;margin-top:.5rem}dd{margin-left:0;white-space:pre-wrap}pre{white-space:pre-wrap}@media print{button{display:none}}</style>
   <body><h1>QA-AI Academy Learning Report</h1><p>Exported ${escapeHtml(new Date().toLocaleString())}</p>
   <p><strong>This is a learner-created activity and evidence record. It is not a certification or independent assessment of mastery.</strong></p>
   <h2>Learner profile</h2><p>${escapeHtml(state.agentName)} — ${escapeHtml(state.agentCover)} — ${escapeHtml(state.agentBg)}</p>
@@ -3653,7 +3749,7 @@ function exportLearningReport() {
   <h2>Field Notes</h2><pre>${escapeHtml(state.notes)}</pre>
   <h2>Prompt Notebook</h2>${state.promptNotebook.map(item => `<h3>${escapeHtml(item.title)}</h3><pre>${escapeHtml(item.prompt)}</pre><p>${escapeHtml(item.notes)}</p>`).join('') || '<p>None saved.</p>'}
   <h2>Optional modules</h2><p>${Object.entries(state.advancedModules).filter(([,v]) => v === 'complete').map(([id]) => escapeHtml(id)).join(', ') || 'None completed.'}</p>
-  <h2>Unassigned and optional-module evidence</h2>${state.evidenceItems.filter(item => !/^m(?:[1-9]|1[0-3])$/.test(item.mission)).map(item => `<h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.evidence)}</p><p>Human decision: ${escapeHtml(item.humanDecision)}</p>`).join('') || '<p>None recorded.</p>'}
+  <h2>Unassigned and optional-module evidence</h2>${state.evidenceItems.filter(item => !/^m(?:[1-9]|1[0-3])$/.test(item.mission)).map(evidenceReportEntry).join('') || '<p>None recorded.</p>'}
   <h2>Edited non-executable Field Kit working copies</h2>${Object.entries(state.kitFiles).filter(([path]) => /\.(md|txt)$/i.test(path)).map(([path,value]) => `<h3>${escapeHtml(path)} (learner-edited working copy)</h3><pre>${escapeHtml(value)}</pre>`).join('') || '<p>None included. Executable JavaScript and Python working code are intentionally excluded.</p>'}
   <h2>Open questions and next checks</h2><ul>${state.evidenceItems.filter(item => item.nextCheck).map(item => `<li>${escapeHtml(item.nextCheck)}</li>`).join('') || '<li>None recorded.</li>'}</ul>
   </body></html>`;

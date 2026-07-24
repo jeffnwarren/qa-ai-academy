@@ -71,6 +71,14 @@ test('first run presents a safe, playable 13-mission campaign', async ({ page })
   }
 });
 
+test('AI coach onboarding activates Field Kit and focuses its heading', async ({ page }) => {
+  await page.getByRole('button', { name: 'How to use an AI coach' }).click();
+  await expect(page.getByRole('tab', { name: 'Field Kit' })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tab', { name: 'Field Kit' })).toHaveAttribute('tabindex', '0');
+  await expect(page.getByRole('heading', { name: 'AI Coach Choices' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'AI Coach Choices' })).toBeFocused();
+});
+
 test('every mission preserves its curriculum structure and skill mapping', async ({ page }) => {
   await seedAllMissionsAvailable(page);
   await openMissions(page);
@@ -118,7 +126,7 @@ test('a learner can complete all missions in order and retain progress', async (
     }
     if (['m8', 'm9', 'm10'].includes(mission.id)) {
       await page.evaluate(id => {
-        const map = { m8:['nodeRiskTriage',3], m9:['browserResetRecon',3], m10:['pythonClaimAudit',5] };
+        const map = { m8:['nodeRiskTriage',3], m9:['browserResetRecon',5], m10:['pythonClaimAudit',5] };
         const [lab, total] = map[id];
         window.recordLabResult(lab, id, 1, total, 'Saved synthetic harness observation.');
       }, mission.id);
@@ -199,12 +207,37 @@ test('embedded lab harnesses report their intentional starting evidence', async 
   await expect(page.locator('#node-output')).toContainText('FAIL');
 
   await page.getByRole('button', { name: 'Run evidence checks' }).click();
-  await expect(page.locator('#browser-output')).toContainText('1/3');
+  await expect(page.locator('#browser-output')).toContainText('3/5');
   await expect(page.locator('#browser-output')).toContainText('FAIL');
 
   await page.getByRole('button', { name: 'Run Python-equivalent tests' }).click();
   await expect(page.locator('#python-output')).toContainText('2/5');
   await expect(page.locator('#python-output')).toContainText('FAIL');
+});
+
+test('browser harness derives semantic evidence from the synthetic reset DOM', async ({ page }) => {
+  await page.getByRole('tab', { name: 'Field Kit' }).click();
+  await page.locator('label[for="reset-email"]').evaluate(label => label.remove());
+  await page.getByRole('button', { name: 'Run evidence checks' }).click();
+  await expect(page.locator('#browser-output')).toContainText('FAIL email control exists and has an associated label');
+
+  await page.reload();
+  await page.getByRole('tab', { name: 'Field Kit' }).click();
+  await page.locator('.reset-lab-row button').evaluate(button => { button.textContent = ''; button.removeAttribute('aria-label'); });
+  await page.locator('.lab-card').filter({ hasText: 'Browser Reset Recon' }).getByRole('button', { name: 'Run evidence checks' }).click();
+  await expect(page.locator('#browser-output')).toContainText('FAIL submit control exists and has a name');
+
+  await page.reload();
+  await page.getByRole('tab', { name: 'Field Kit' }).click();
+  await page.locator('#reset-result').evaluate(result => { result.removeAttribute('role'); result.removeAttribute('aria-live'); });
+  await page.getByRole('button', { name: 'Run evidence checks' }).click();
+  await expect(page.locator('#browser-output')).toContainText('FAIL result region exists and exposes status semantics');
+
+  await page.reload();
+  await page.getByRole('tab', { name: 'Field Kit' }).click();
+  await page.getByRole('button', { name: 'Run evidence checks' }).click();
+  await expect(page.locator('#browser-output')).toContainText('PASS email control exists and has an associated label');
+  await expect(page.locator('#browser-output')).toContainText('3/5');
 });
 
 test('embedded JavaScript labs pass after bounded repairs and persist observations', async ({ page }) => {
@@ -224,7 +257,7 @@ test('embedded JavaScript labs pass after bounded repairs and persist observatio
   }
   module.exports = { confirmReset };`);
   await page.getByRole('button', { name: 'Run evidence checks' }).click();
-  await expect(page.locator('#browser-output')).toContainText('3/3');
+  await expect(page.locator('#browser-output')).toContainText('5/5');
 
   await page.reload();
   await page.getByRole('tab', { name: 'Field Kit' }).click();
@@ -386,6 +419,15 @@ test('token demo is offline and learning report escapes learner markup', async (
   await page.getByLabel('What surprised you about the segmentation?').fill('<script>bad()</script>');
   await page.getByRole('tab', { name: 'Field Notes' }).click();
   await page.locator('#field-notes').fill('<script>bad()</script>');
+  await page.evaluate(() => {
+    const now = new Date().toISOString();
+    state.evidenceItems = [
+      { id:'report-m13', title:'Ledger "one" & more', mission:'m13', caseId:'source-ledger', status:'supported', claim:'Exact claim', evidence:'<b>Evidence & detail</b>', source:'Official organization & URL', humanDecision:'Treat as guidance', nextCheck:'Check next quarter', updatedAt:now },
+      { id:'report-optional', title:'Optional record', mission:'a1', caseId:'optional-case', status:'unverified', claim:'Optional claim', evidence:'', source:'', humanDecision:'', nextCheck:'', updatedAt:now },
+      { id:'report-unassigned', title:'Legacy unassigned', mission:'', caseId:'', status:'assumption', claim:'Legacy claim', evidence:'Legacy evidence', source:'Legacy source', humanDecision:'Review', nextCheck:'Confirm', updatedAt:now },
+    ];
+    save();
+  });
 
   await page.getByRole('button', { name: 'Options' }).click();
   const downloadPromise = page.waitForEvent('download');
@@ -393,6 +435,14 @@ test('token demo is offline and learning report escapes learner markup', async (
   const reportPath = await (await downloadPromise).path();
   const report = require('node:fs').readFileSync(reportPath, 'utf8');
   expect(report).not.toContain('<script>bad()</script>');
+  expect(report).not.toContain('<b>Evidence & detail</b>');
+  for (const label of ['Mission', 'Case or lab', 'Status', 'Claim', 'Evidence', 'Source', 'Human decision', 'Next check', 'Updated']) {
+    expect(report).toContain(`<dt>${label}</dt>`);
+  }
+  expect(report).toContain('Ledger &quot;one&quot; &amp; more');
+  expect(report).toContain('Optional record');
+  expect(report).toContain('Legacy unassigned');
+  expect(report).toContain('&lt;b&gt;Evidence &amp; detail&lt;/b&gt;');
   expect(report).toContain('not a certification or independent assessment');
 });
 
@@ -412,4 +462,135 @@ test('Evidence Board links and filters mission records with a human decision', a
   await page.getByLabel('Filter by mission').selectOption('m9');
   await page.getByLabel('Filter by case or lab').fill('browserReset');
   await expect(page.locator('.evidence-card')).toHaveCount(1);
+});
+
+test('Supported evidence requires evidence and source while drafts remain allowed', async ({ page }) => {
+  await page.getByRole('tab', { name: 'Evidence' }).click();
+  await page.locator('#evidence-title').fill('Supported claim');
+  await page.locator('#evidence-status').selectOption('supported');
+  await page.getByRole('button', { name: 'Add evidence' }).click();
+  await expect(page.locator('#evidence-validation')).toHaveText('Supported records require both evidence and a source.');
+  await expect(page.locator('#evidence-evidence')).toHaveAttribute('aria-invalid', 'true');
+  await expect(page.locator('#evidence-source')).toHaveAttribute('aria-invalid', 'true');
+  await expect(page.locator('#evidence-evidence')).toBeFocused();
+  await expect(page.locator('#evidence-title')).toHaveValue('Supported claim');
+
+  await page.locator('#evidence-evidence').fill('Observed synthetic result.');
+  await page.getByRole('button', { name: 'Add evidence' }).click();
+  await expect(page.locator('#evidence-validation')).toHaveText('Supported records require both evidence and a source.');
+  await expect(page.locator('#evidence-source')).toBeFocused();
+
+  await page.locator('#evidence-source').fill('Synthetic harness output');
+  await page.getByRole('button', { name: 'Add evidence' }).click();
+  await expect(page.locator('.evidence-card')).toContainText('Supported claim');
+
+  await page.locator('#evidence-title').fill('Unverified draft');
+  await page.getByRole('button', { name: 'Add evidence' }).click();
+  await expect(page.locator('.evidence-card')).toHaveCount(2);
+
+  await page.locator('.evidence-card').filter({ hasText:'Supported claim' }).getByRole('button', { name:'Edit' }).click();
+  await page.locator('#evidence-source').fill('');
+  await page.getByRole('button', { name: 'Update evidence' }).click();
+  await expect(page.locator('#evidence-validation')).toHaveText('Supported records require both evidence and a source.');
+});
+
+test('legacy incomplete Supported evidence remains visible but must validate when resaved', async ({ page }) => {
+  await page.evaluate(storageKey => {
+    localStorage.setItem(storageKey, JSON.stringify({
+      contentVersion: 12,
+      evidenceItems: [{
+        id:'legacy-supported', title:'Legacy supported record', status:'supported',
+        evidence:'', source:'', updatedAt:'2025-01-01T00:00:00.000Z',
+      }],
+    }));
+  }, STORAGE_KEY);
+  await page.reload();
+  await page.getByRole('tab', { name:'Evidence' }).click();
+  await expect(page.locator('.evidence-card')).toContainText('Legacy supported record');
+  await page.getByRole('button', { name:'Edit' }).click();
+  await page.getByRole('button', { name:'Update evidence' }).click();
+  await expect(page.locator('#evidence-validation')).toHaveText('Supported records require both evidence and a source.');
+  await expect(page.locator('.evidence-card')).toContainText('Legacy supported record');
+});
+
+test('Mission 13 requires three prompts and two strict source-ledger records', async ({ page }) => {
+  await seedAllMissionsAvailable(page);
+  await openMissions(page);
+  await page.locator('#item-m13').click();
+  for (const answer of await page.locator('[data-debrief-id]').all()) {
+    await answer.fill('A sufficiently detailed learner reflection.');
+  }
+  for (const checkbox of await page.locator('.attestation-list input:not([disabled])').all()) await checkbox.check();
+
+  await page.evaluate(() => {
+    state.promptNotebook = [1,2,3].map(n => ({ id:`strict-p${n}`, title:`Recipe ${n}`, category:'verify', prompt:'Synthetic prompt', notes:'', sourceCaseId:'', updatedAt:new Date().toISOString() }));
+    const base = { mission:'m13', status:'unverified', claim:'Claim', humanDecision:'Guidance', updatedAt:new Date().toISOString() };
+    state.evidenceItems = [
+      { ...base, id:'generic', title:'Generic source ledger', caseId:'other', evidence:'Evidence', source:'Source', nextCheck:'Refresh' },
+      { ...base, id:'missing-source', title:'Missing source', caseId:'source-ledger', evidence:'Evidence', source:'', nextCheck:'Refresh' },
+      { ...base, id:'missing-evidence', title:'Missing evidence', caseId:'source-ledger', evidence:'', source:'Source', nextCheck:'Refresh' },
+      { ...base, id:'missing-next', title:'Missing next', caseId:'source-ledger', evidence:'Evidence', source:'Source', nextCheck:'' },
+    ];
+    save();
+  });
+  await expect(page.locator('#m13-complete-btn')).toBeDisabled();
+
+  await page.evaluate(() => {
+    const base = { mission:'m13', caseId:'source-ledger', status:'unverified', claim:'Claim', evidence:'Exact supported practice', source:'Organization; URL; access date', nextCheck:'Check currency next quarter', humanDecision:'Guidance', updatedAt:new Date().toISOString() };
+    state.evidenceItems.push(
+      { ...base, id:'qualifying-1', title:'Official source one' },
+      { ...base, id:'qualifying-2', title:'Official source two' }
+    );
+    save();
+  });
+  await expect(page.locator('#m13-complete-btn')).toBeEnabled();
+});
+
+test('Mission 13 source-ledger action prefills a reviewable unverified record', async ({ page }) => {
+  await seedAllMissionsAvailable(page);
+  await openMissions(page);
+  await page.locator('#item-m13').click();
+  await page.getByRole('button', { name:'Add source-ledger evidence' }).click();
+  await expect(page.getByRole('tab', { name:'Evidence' })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.locator('#evidence-mission')).toHaveValue('m13');
+  await expect(page.locator('#evidence-case')).toHaveValue('source-ledger');
+  await expect(page.locator('#evidence-status')).toHaveValue('unverified');
+  await expect(page.locator('#evidence-title')).toBeFocused();
+});
+
+test('completed campaign review focuses the visible mission roster heading', async ({ page }) => {
+  await page.evaluate(({ storageKey, missionIds }) => {
+    localStorage.setItem(storageKey, JSON.stringify({
+      contentVersion: 13,
+      missions: Object.fromEntries(missionIds.map(id => [id, 'complete'])),
+    }));
+  }, { storageKey: STORAGE_KEY, missionIds: MISSIONS.map(mission => mission.id) });
+  await page.reload();
+  await page.getByRole('button', { name: 'Review completed campaign' }).click();
+  await expect(page.getByRole('tab', { name: 'Missions' })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('heading', { name: 'Active mission roster' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Active mission roster' })).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#item-m1')).toBeFocused();
+});
+
+test('canonical Academy carries content version 13 and deployment marker', () => {
+  const academy = require('node:fs').readFileSync(path.join(__dirname, '..', '..', 'qa_ai_academy.html'), 'utf8');
+  const landing = require('node:fs').readFileSync(path.join(__dirname, '..', '..', '..', 'index.html'), 'utf8');
+  expect(academy).toContain('const CONTENT_VERSION = 13;');
+  expect(academy).toContain('Academy content version 13');
+  expect(landing).toContain('qa-ai-academy/qa_ai_academy.html');
+});
+
+test('normal Academy workflow produces no uncaught page or console errors', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+  for (const tab of ['Missions', 'Advanced', 'Field Kit', 'Evidence', 'Field Notes', 'Dossier']) {
+    await page.getByRole('tab', { name:tab }).click();
+  }
+  await page.getByRole('button', { name:'How to use an AI coach' }).click();
+  await page.getByRole('button', { name:'Run Node-equivalent tests' }).click();
+  await expect(page.locator('#node-output')).toContainText('2/3');
+  expect(errors).toEqual([]);
 });

@@ -88,7 +88,8 @@ Maintainer manual test checklist for `qa_ai_academy.html`.
 ## Embedded Lab Harnesses
 
 - In the Field Kit, run the Node-equivalent harness and confirm the initial code passes 2/3 checks and fails severity ordering.
-- Run the browser evidence harness and confirm semantics pass while both privacy checks fail.
+- Run the browser evidence harness and confirm three inspected DOM-semantics checks pass while both privacy checks fail (`3/5`).
+- Temporarily remove the reset label, button name, and result-region live/status semantics one at a time; confirm the corresponding semantic check fails, then restore the markup.
 - Run the Python-equivalent harness and confirm the initial rules pass 2/5 controlled cases.
 - Confirm each harness reports its boundary and never presents itself as a complete Node, Python, Playwright, accessibility, or semantic-analysis runtime.
 - Confirm editable JavaScript runs only in a temporary `sandbox="allow-scripts"` opaque-origin frame and that the frame is removed after result, error, or timeout.
@@ -128,11 +129,25 @@ Maintainer manual test checklist for `qa_ai_academy.html`.
 ## Evidence, Onboarding, And Reports
 
 - Confirm first use shows **Begin Mission 01**, returning progress shows the first incomplete unlocked mission, and campaign completion offers review.
+- From Dossier, activate **How to use an AI coach** and confirm Field Kit opens, its tab state updates, and **AI Coach Choices** receives focus.
+- Seed a completed campaign, activate **Review completed campaign**, and confirm the visible semantic roster heading receives focus before Mission 01 in the Tab order.
 - Confirm copied mission briefings include curriculum content and safety boundaries but exclude profile, notes, debriefs, evidence, and unselected files.
 - Confirm mission/status/case Evidence Board filters work and lab-result prefills remain editable before submission.
+- Try saving Supported evidence without Evidence and then without Source; confirm the live validation message, focus, and invalid state identify the first missing field without clearing the form. Confirm an Unverified draft remains allowed.
+- In Mission 13, confirm only records with mission `m13`, exact case `source-ledger`, and nonempty title, Source, Evidence, and Next check qualify; two qualifying records and three Prompt Notebook entries are required.
+- Use **Add source-ledger evidence** from Mission 13 and confirm Mission 13 and `source-ledger` are prefilled while status remains Unverified.
 - Export the printable learning report, open it locally, print-preview it, and confirm attestation, observation, and non-certification wording is accurate.
+- Confirm every mandatory, optional, and unassigned evidence entry includes title, mission, case/lab, status, claim, evidence, source, human decision, next check, and updated time.
 - Enter HTML-like learner text and confirm the report displays it as text rather than markup.
 - Confirm the offline Mission 01 segmentation demo works with the external comparison site unavailable and labels its result approximate.
+
+## GitHub Pages Version Check
+
+- Canonical repository file: `qa-ai-academy/qa_ai_academy.html`.
+- Canonical project URL: `https://jeffnwarren.github.io/qa-ai-academy/qa-ai-academy/qa_ai_academy.html`.
+- Confirm both root landing-page actions use `qa-ai-academy/qa_ai_academy.html` with matching path casing.
+- After deployment, open Options and confirm **Academy content version 13** appears. Use a private window or cache-busting query if comparing deployments, but first verify the served URL and page source.
+- Confirm the separate `labs/playwright-reset-flow/index.html` remains an optional lab rather than a duplicate Academy deployment.
 
 ## Reset
 
