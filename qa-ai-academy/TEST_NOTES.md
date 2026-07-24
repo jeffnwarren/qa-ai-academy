@@ -42,6 +42,10 @@ Maintainer manual test checklist for `qa_ai_academy.html`.
 ## Mission Progression
 
 - Open Mission 01 and confirm the completion button starts disabled.
+- Confirm debrief text alone and activity attestations alone cannot enable completion.
+- Confirm each activity checkbox persists and is never checked merely by opening a mission.
+- Confirm Missions 08-10 record the latest harness observation, while learner-led activities remain learner-attested.
+- Confirm Mission 13 requires three Prompt Notebook entries and two linked source-ledger records.
 - Enter short text under 12 characters in each debrief and confirm completion remains disabled.
 - Enter useful answers in all debrief fields and confirm completion becomes enabled.
 - Complete Mission 01 and confirm points increase to `5` and Mission 02 unlocks.
@@ -87,6 +91,9 @@ Maintainer manual test checklist for `qa_ai_academy.html`.
 - Run the browser evidence harness and confirm semantics pass while both privacy checks fail.
 - Run the Python-equivalent harness and confirm the initial rules pass 2/5 controlled cases.
 - Confirm each harness reports its boundary and never presents itself as a complete Node, Python, Playwright, accessibility, or semantic-analysis runtime.
+- Confirm editable JavaScript runs only in a temporary `sandbox="allow-scripts"` opaque-origin frame and that the frame is removed after result, error, or timeout.
+- Try synthetic probes for `parent.document`, `localStorage`, and `fetch`; confirm they cannot reach Academy data or complete a network result.
+- Try a syntax error, missing export, thrown error, cyclic return value, and infinite loop; confirm controlled messages and a usable interface afterward.
 
 ## Optional Authentic-Runtime Extensions
 
@@ -104,12 +111,28 @@ Maintainer manual test checklist for `qa_ai_academy.html`.
 ## Accessibility And Layout
 
 - Navigate tabs, Options, mission cards, debrief fields, and completion buttons using only the keyboard.
+- Confirm Left/Right/Home/End move focus through tabs and Enter/Space activates the focused tab.
+- Confirm mission and optional-module headings receive focus on entry and the launcher receives focus on return.
+- Confirm Escape closes Options, returns focus, and `aria-expanded` stays accurate.
+- Confirm the skip link becomes visible on focus and reaches the main landmark.
+- With reduced motion enabled, confirm nonessential transitions and completion effects are minimized.
+- Inspect ordinary saved/copied/result messages with a screen reader; reserve urgent announcement behavior for errors.
 - Confirm visible focus states appear on mission cards and controls.
 - Confirm labels are associated with dossier identity inputs.
 - Confirm tab `aria-selected` state changes as tabs are selected.
 - Check layout at narrow mobile width around 320px.
 - Check text size extremes from 12 to 22.
 - Check dark and light themes for readable contrast.
+- Check the complete workflow at 200% browser zoom; this is a human usability check, not a WCAG-conformance claim.
+
+## Evidence, Onboarding, And Reports
+
+- Confirm first use shows **Begin Mission 01**, returning progress shows the first incomplete unlocked mission, and campaign completion offers review.
+- Confirm copied mission briefings include curriculum content and safety boundaries but exclude profile, notes, debriefs, evidence, and unselected files.
+- Confirm mission/status/case Evidence Board filters work and lab-result prefills remain editable before submission.
+- Export the printable learning report, open it locally, print-preview it, and confirm attestation, observation, and non-certification wording is accurate.
+- Enter HTML-like learner text and confirm the report displays it as text rather than markup.
+- Confirm the offline Mission 01 segmentation demo works with the external comparison site unavailable and labels its result approximate.
 
 ## Reset
 

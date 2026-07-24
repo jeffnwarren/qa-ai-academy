@@ -40,8 +40,8 @@ async function openMissions(page) {
 async function seedAllMissionsAvailable(page) {
   await page.goto(appUrl);
   await page.evaluate(({ storageKey, missionIds }) => {
-    const missions = Object.fromEntries(missionIds.map(id => [id, 'current']));
-    localStorage.setItem(storageKey, JSON.stringify({ contentVersion: 12, missions }));
+    const missions = Object.fromEntries(missionIds.map((id, index) => [id, index < missionIds.length - 1 ? 'complete' : 'current']));
+    localStorage.setItem(storageKey, JSON.stringify({ contentVersion: 13, missions }));
   }, { storageKey: STORAGE_KEY, missionIds: MISSIONS.map(mission => mission.id) });
   await page.reload();
 }
@@ -111,6 +111,27 @@ test('a learner can complete all missions in order and retain progress', async (
 
     for (let question = 0; question < Math.min(4, mission.questions); question += 1) {
       await answers.nth(question).fill(`Evidence-based reflection for ${mission.id} question ${question + 1}.`);
+    }
+
+    for (const checkbox of await page.locator('.attestation-list input:not([disabled])').all()) {
+      await checkbox.check();
+    }
+    if (['m8', 'm9', 'm10'].includes(mission.id)) {
+      await page.evaluate(id => {
+        const map = { m8:['nodeRiskTriage',3], m9:['browserResetRecon',3], m10:['pythonClaimAudit',5] };
+        const [lab, total] = map[id];
+        window.recordLabResult(lab, id, 1, total, 'Saved synthetic harness observation.');
+      }, mission.id);
+    }
+    if (mission.id === 'm13') {
+      await page.evaluate(() => {
+        state.promptNotebook = [1,2,3].map(n => ({ id:`p${n}`, title:`Recipe ${n}`, category:'verify', prompt:'Synthetic prompt', notes:'', sourceCaseId:'', updatedAt:new Date().toISOString() }));
+        state.evidenceItems.unshift(
+          { id:'s1', title:'Source ledger one', mission:'m13', caseId:'source-ledger', claim:'Source', evidence:'Record', source:'Official source', status:'supported', nextCheck:'Refresh', humanDecision:'Retain', updatedAt:new Date().toISOString() },
+          { id:'s2', title:'Source ledger two', mission:'m13', caseId:'source-ledger', claim:'Source', evidence:'Record', source:'Official source', status:'supported', nextCheck:'Refresh', humanDecision:'Retain', updatedAt:new Date().toISOString() }
+        );
+        window.save();
+      });
     }
 
     if (mission.questions > 4) {
@@ -186,12 +207,38 @@ test('embedded lab harnesses report their intentional starting evidence', async 
   await expect(page.locator('#python-output')).toContainText('FAIL');
 });
 
+test('embedded JavaScript labs pass after bounded repairs and persist observations', async ({ page }) => {
+  await page.getByRole('tab', { name: 'Field Kit' }).click();
+  await page.getByRole('button', { name: 'node-risk-triage/riskTriage.js' }).click();
+  const nodeEditor = page.locator('#kit-editor');
+  await nodeEditor.fill((await nodeEditor.inputValue()).replace(
+    ".sort((a, b) => String(a.severity).localeCompare(String(b.severity)))",
+    ".sort((a, b) => ({critical:0,high:1,medium:2,low:3}[a.severity] ?? 99) - ({critical:0,high:1,medium:2,low:3}[b.severity] ?? 99))"
+  ));
+  await page.getByRole('button', { name: 'Run Node-equivalent tests' }).click();
+  await expect(page.locator('#node-output')).toContainText('3/3');
+
+  await page.getByRole('button', { name: 'browser-reset-flow/app-behavior.js' }).click();
+  await page.locator('#kit-editor').fill(`function confirmReset() {
+    return 'If the email is registered, a reset link will be sent.';
+  }
+  module.exports = { confirmReset };`);
+  await page.getByRole('button', { name: 'Run evidence checks' }).click();
+  await expect(page.locator('#browser-output')).toContainText('3/3');
+
+  await page.reload();
+  await page.getByRole('tab', { name: 'Field Kit' }).click();
+  await expect(page.locator('#node-output')).toContainText('Latest saved result');
+  await expect(page.locator('#browser-output')).toContainText('Latest saved result');
+});
+
 test('completion offers direct continuation to the newly unlocked mission', async ({ page }) => {
   await openMissions(page);
   await page.locator('#item-m1').click();
   for (const answer of await page.locator('[data-debrief-id]').all()) {
     await answer.fill('A sufficiently detailed evidence-based reflection.');
   }
+  for (const checkbox of await page.locator('.attestation-list input:not([disabled])').all()) await checkbox.check();
   await page.locator('#m1-complete-btn').click();
   await page.getByRole('button', { name: /Continue to next mission/i }).click();
   await expect(page.locator('.mission-title')).toHaveText('"The Briefing Room"');
@@ -279,7 +326,7 @@ test('legacy saves migrate to current style and retain derived progress', async 
 test('keyboard focus, maximum text size, narrow layout, and theme persist', async ({ page }) => {
   const dossierTab = page.getByRole('tab', { name: 'Dossier' });
   await dossierTab.focus();
-  await page.keyboard.press('Tab');
+  await page.keyboard.press('ArrowRight');
   await expect(page.getByRole('tab', { name: 'Missions' })).toBeFocused();
   const outline = await page.getByRole('tab', { name: 'Missions' }).evaluate(
     element => getComputedStyle(element).outlineStyle
@@ -302,4 +349,67 @@ test('keyboard focus, maximum text size, narrow layout, and theme persist', asyn
   await expect(page.locator('body')).toHaveClass(/light/);
   await page.getByRole('button', { name: 'Options' }).click();
   await expect(page.locator('#font-display')).toHaveText('22');
+});
+
+test('editable JavaScript sandbox blocks Academy access, network output, and infinite execution', async ({ page }) => {
+  const attempts = {
+    parent: `module.exports = { probe() { return parent.document.title; } };`,
+    storage: `module.exports = { probe() { return localStorage.getItem('qa_ai_academy_v1'); } };`,
+    network: `module.exports = { probe() { return fetch('https://example.com/blocked'); } };`,
+  };
+  for (const source of Object.values(attempts)) {
+    const message = await page.evaluate(async sourceText => {
+      try { await runSandboxedCommonJs(sourceText, 'probe', []); return 'unexpected success'; }
+      catch (error) { return error.message; }
+    }, source);
+    expect(message).not.toBe('unexpected success');
+  }
+
+  const timeout = await page.evaluate(async () => {
+    try {
+      await runSandboxedCommonJs(`module.exports = { probe() { while (true) {} } };`, 'probe', [], 100);
+      return 'unexpected success';
+    } catch (error) { return error.message; }
+  });
+  expect(timeout).toContain('Execution timeout');
+
+  await page.getByRole('tab', { name: 'Field Kit' }).click();
+  await page.getByRole('button', { name: 'Run Node-equivalent tests' }).click();
+  await expect(page.locator('#node-output')).toContainText('2/3');
+});
+
+test('token demo is offline and learning report escapes learner markup', async ({ page }) => {
+  await openMissions(page);
+  await page.locator('#item-m1').click();
+  await page.getByLabel('Synthetic or approved non-sensitive text').fill('reset_token!');
+  await expect(page.locator('#token-demo-output')).toContainText('[reset_]');
+  await page.getByLabel('What surprised you about the segmentation?').fill('<script>bad()</script>');
+  await page.getByRole('tab', { name: 'Field Notes' }).click();
+  await page.locator('#field-notes').fill('<script>bad()</script>');
+
+  await page.getByRole('button', { name: 'Options' }).click();
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Export learning report' }).click();
+  const reportPath = await (await downloadPromise).path();
+  const report = require('node:fs').readFileSync(reportPath, 'utf8');
+  expect(report).not.toContain('<script>bad()</script>');
+  expect(report).toContain('not a certification or independent assessment');
+});
+
+test('Evidence Board links and filters mission records with a human decision', async ({ page }) => {
+  await page.getByRole('tab', { name: 'Evidence' }).click();
+  await page.locator('#evidence-title').fill('Synthetic privacy observation');
+  await page.getByLabel('Mission', { exact:true }).selectOption('m9');
+  await page.getByLabel('Case or lab', { exact:true }).fill('browserResetRecon');
+  await page.locator('#evidence-evidence').fill('Known and unknown responses differed.');
+  await page.getByLabel('Human decision').fill('Repair the message and rerun.');
+  await page.getByRole('button', { name: 'Add evidence' }).click();
+  await expect(page.locator('.evidence-card')).toContainText('Mission 09');
+  await expect(page.locator('.evidence-card')).toContainText('Repair the message and rerun.');
+
+  await page.getByLabel('Filter by mission').selectOption('m8');
+  await expect(page.locator('.evidence-card')).toHaveCount(0);
+  await page.getByLabel('Filter by mission').selectOption('m9');
+  await page.getByLabel('Filter by case or lab').fill('browserReset');
+  await expect(page.locator('.evidence-card')).toHaveCount(1);
 });
