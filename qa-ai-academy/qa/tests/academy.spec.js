@@ -22,6 +22,11 @@ const MISSIONS = [
   { id: 'm11', title: '"Two-Agent Review"', questions: 5, skills: ['Critical Evaluation', 'Prompt Design', 'Workflow Integration'] },
   { id: 'm12', title: '"Memory Protocol"', questions: 4, skills: ['Model Literacy', 'Human Judgment', 'Workflow Integration'] },
   { id: 'm13', title: '"Tradecraft Journal"', questions: 5, skills: ['Workflow Integration', 'Human Judgment', 'Model Literacy'] },
+  { id: 'm14', title: '"Two Rolls, Two Answers"', questions: 4, skills: ['Critical Evaluation', 'Model Literacy'] },
+  { id: 'm15', title: '"The Oracle Trap"', questions: 4, skills: ['Human Judgment', 'Critical Evaluation'] },
+  { id: 'm16', title: '"Coverage Mirage"', questions: 4, skills: ['Critical Evaluation', 'Workflow Integration'] },
+  { id: 'm17', title: '"Red Team Recon"', questions: 4, skills: ['Human Judgment', 'Model Literacy'] },
+  { id: 'm18', title: '"Contract Enforcement"', questions: 4, skills: ['Workflow Integration', 'Critical Evaluation'] },
 ];
 
 const REQUIRED_SECTIONS = [
@@ -41,8 +46,18 @@ async function seedAllMissionsAvailable(page) {
   await page.goto(appUrl);
   await page.evaluate(({ storageKey, missionIds }) => {
     const missions = Object.fromEntries(missionIds.map((id, index) => [id, index < missionIds.length - 1 ? 'complete' : 'current']));
-    localStorage.setItem(storageKey, JSON.stringify({ contentVersion: 13, missions }));
+    localStorage.setItem(storageKey, JSON.stringify({ contentVersion: 14, missions }));
   }, { storageKey: STORAGE_KEY, missionIds: MISSIONS.map(mission => mission.id) });
+  await page.reload();
+}
+
+async function seedMissionCurrent(page, targetId) {
+  await page.goto(appUrl);
+  await page.evaluate(({ storageKey, missionIds, targetId }) => {
+    const targetIndex = missionIds.indexOf(targetId);
+    const missions = Object.fromEntries(missionIds.map((id, index) => [id, index < targetIndex ? 'complete' : 'current']));
+    localStorage.setItem(storageKey, JSON.stringify({ contentVersion: 14, missions }));
+  }, { storageKey: STORAGE_KEY, missionIds: MISSIONS.map(mission => mission.id), targetId });
   await page.reload();
 }
 
@@ -55,7 +70,7 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
 });
 
-test('first run presents a safe, playable 13-mission campaign', async ({ page }) => {
+test('first run presents a safe, playable 18-mission campaign', async ({ page }) => {
   await expect(page.getByRole('heading', { name: /Practical AI Testing/ })).toBeVisible();
   await expect(page.getByText('Progress points:')).toContainText('0');
   await expect(page.locator('#current-die')).toHaveText('d4');
@@ -63,7 +78,7 @@ test('first run presents a safe, playable 13-mission campaign', async ({ page })
 
   await openMissions(page);
   const roster = page.locator('#mission-roster .mission-item');
-  await expect(roster).toHaveCount(13);
+  await expect(roster).toHaveCount(18);
   await expect(page.locator('#item-m1')).toBeEnabled();
 
   for (const mission of MISSIONS.slice(1)) {
@@ -124,9 +139,9 @@ test('a learner can complete all missions in order and retain progress', async (
     for (const checkbox of await page.locator('.attestation-list input:not([disabled])').all()) {
       await checkbox.check();
     }
-    if (['m8', 'm9', 'm10'].includes(mission.id)) {
+    if (['m8', 'm9', 'm10', 'm16', 'm18'].includes(mission.id)) {
       await page.evaluate(id => {
-        const map = { m8:['nodeRiskTriage',3], m9:['browserResetRecon',5], m10:['pythonClaimAudit',5] };
+        const map = { m8:['nodeRiskTriage',3], m9:['browserResetRecon',5], m10:['pythonClaimAudit',5], m16:['coverageMirage',4], m18:['contractEnforcement',6] };
         const [lab, total] = map[id];
         window.recordLabResult(lab, id, 1, total, 'Saved synthetic harness observation.');
       }, mission.id);
@@ -170,13 +185,13 @@ test('a learner can complete all missions in order and retain progress', async (
   }
 
   await expect(page.locator('#current-die')).toHaveText('d12');
-  await page.locator('#item-m13').click();
+  await page.locator('#item-m18').click();
   await page.getByRole('button', { name: 'Return to dossier' }).click();
   await expect(page.getByRole('tab', { name: 'Dossier' })).toHaveAttribute('aria-selected', 'true');
   await page.reload();
   await openMissions(page);
   await expect(page.locator('.mission-status.complete')).toHaveCount(MISSIONS.length);
-  await expect(page.locator('#pts-display')).toHaveText('65');
+  await expect(page.locator('#pts-display')).toHaveText('90');
 });
 
 test('profile, notes, and campaign style survive reload', async ({ page }) => {
@@ -279,9 +294,9 @@ test('completion offers direct continuation to the newly unlocked mission', asyn
 
 test('optional advanced modules preserve structure and save completion independently', async ({ page }) => {
   await page.getByRole('tab', { name: 'Advanced' }).click();
-  await expect(page.locator('#advanced-roster .mission-item')).toHaveCount(8);
+  await expect(page.locator('#advanced-roster .mission-item')).toHaveCount(13);
 
-  for (let index = 0; index < 8; index += 1) {
+  for (let index = 0; index < 13; index += 1) {
     await page.locator(`#advanced-item-a${index + 1}`).click();
     await expect(page.locator('.section-label')).toHaveCount(6);
     await expect(page.locator('[data-debrief-id]')).toHaveCount(2);
@@ -514,7 +529,7 @@ test('legacy incomplete Supported evidence remains visible but must validate whe
 });
 
 test('Mission 13 requires three prompts and two strict source-ledger records', async ({ page }) => {
-  await seedAllMissionsAvailable(page);
+  await seedMissionCurrent(page, 'm13');
   await openMissions(page);
   await page.locator('#item-m13').click();
   for (const answer of await page.locator('[data-debrief-id]').all()) {
@@ -547,7 +562,7 @@ test('Mission 13 requires three prompts and two strict source-ledger records', a
 });
 
 test('Mission 13 source-ledger action prefills a reviewable unverified record', async ({ page }) => {
-  await seedAllMissionsAvailable(page);
+  await seedMissionCurrent(page, 'm13');
   await openMissions(page);
   await page.locator('#item-m13').click();
   await page.getByRole('button', { name:'Add source-ledger evidence' }).click();
@@ -561,7 +576,7 @@ test('Mission 13 source-ledger action prefills a reviewable unverified record', 
 test('completed campaign review focuses the visible mission roster heading', async ({ page }) => {
   await page.evaluate(({ storageKey, missionIds }) => {
     localStorage.setItem(storageKey, JSON.stringify({
-      contentVersion: 13,
+      contentVersion: 14,
       missions: Object.fromEntries(missionIds.map(id => [id, 'complete'])),
     }));
   }, { storageKey: STORAGE_KEY, missionIds: MISSIONS.map(mission => mission.id) });
@@ -574,11 +589,11 @@ test('completed campaign review focuses the visible mission roster heading', asy
   await expect(page.locator('#item-m1')).toBeFocused();
 });
 
-test('canonical Academy carries content version 13 and deployment marker', () => {
+test('canonical Academy carries content version 14 and deployment marker', () => {
   const academy = require('node:fs').readFileSync(path.join(__dirname, '..', '..', 'qa_ai_academy.html'), 'utf8');
   const landing = require('node:fs').readFileSync(path.join(__dirname, '..', '..', '..', 'index.html'), 'utf8');
-  expect(academy).toContain('const CONTENT_VERSION = 13;');
-  expect(academy).toContain('Academy content version 13');
+  expect(academy).toContain('const CONTENT_VERSION = 14;');
+  expect(academy).toContain('Academy content version 14');
   expect(landing).toContain('qa-ai-academy/qa_ai_academy.html');
 });
 

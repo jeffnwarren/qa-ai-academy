@@ -52,6 +52,30 @@ edge, adversarial, and privacy-sensitive synthetic cases where relevant. A pass
 means the stated criteria were met for the recorded cases; it does not prove the
 system will behave correctly for every input.
 
+## Test Design Toolkit
+
+AI can draft test cases quickly, but the expected results must come from the
+requirement, not the implementation. Use these classic techniques to decide
+which cases are worth drafting, and verify every AI-suggested case against the
+stated rule before trusting it.
+
+- **Equivalence partitioning:** group inputs that should be treated the same and
+  test one representative from each partition, including at least one invalid
+  partition. Example rule "12+ characters": one valid-length and one too-short
+  representative.
+- **Boundary value analysis:** most defects hide at edges, so test just below,
+  at, and just above each boundary. For "between 0 and 1 inclusive": -0.1, 0, 1,
+  and 1.1.
+- **Decision tables:** when several conditions combine, enumerate the
+  condition/outcome rows so no combination is forgotten. For a rule requiring
+  lowercase, uppercase, and a digit, each row drops exactly one requirement and
+  expects rejection.
+
+For each case, record the input, the expected result, and which requirement or
+partition it exercises. A green suite is only as strong as the partitions,
+boundaries, and combinations it actually covers; mutation testing (Mission 16)
+measures that strength.
+
 ## Accessibility Evidence Card
 
 Accessibility automation can identify some detectable problems, but it cannot
@@ -118,3 +142,13 @@ Accessed 2026-07-19.
 - Mission 11: use a threat-informed reviewer without surrendering human judgment.
 - Mission 13: preserve source, risk, evaluation, and accessibility habits in the
   final personal playbook.
+- Mission 14: write property-based acceptance rules that tolerate cosmetic
+  variance while catching behavioral regressions.
+- Mission 15: derive expected results from requirements, not the implementation,
+  to escape the oracle trap.
+- Mission 16: strengthen weak cases until mutation testing kills every seeded
+  defect.
+- Mission 17: treat every input as an attack surface and probe for prompt
+  injection before trusting an AI feature.
+- Mission 18: enforce a response contract for structured output instead of
+  trusting that it parsed.

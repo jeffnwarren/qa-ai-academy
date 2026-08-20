@@ -8,7 +8,7 @@ QA-AI Academy is a standalone browser curriculum that helps software testers pra
 
 ### Mandatory standalone campaign
 
-The complete 13-mission campaign is contained in `qa-ai-academy/qa_ai_academy.html`. The learner uploads that file to an AI chatbot for learning-handler context and opens the same file in a browser for the interactive dashboard.
+The complete 18-mission campaign is contained in `qa-ai-academy/qa_ai_academy.html`. The learner uploads that file to an AI chatbot for learning-handler context and opens the same file in a browser for the interactive dashboard.
 
 The standalone path includes:
 
@@ -19,7 +19,7 @@ The standalone path includes:
 - dependency-free Node-equivalent, browser-evidence, and Python-equivalent harnesses;
 - Evidence Board, Field Notes, and Prompt Notebook;
 - local save, export, import, and reset behavior.
-- eight optional advanced modules with independent saved reflections and no
+- thirteen optional advanced modules with independent saved reflections and no
   effect on mandatory mission progression or points.
 
 Completing the embedded work satisfies the full campaign. The browser path does not require the repository, VS Code, Node.js, Python, Playwright, package installation, a server, or internet access after the HTML is available. An AI chatbot is required for the guided AI-learning interactions, but no provider-specific API integration is built into the dossier.
@@ -43,7 +43,7 @@ The JavaScript exercises execute editable synthetic code in the local page. The 
 
 ## Current State Model
 
-`CONTENT_VERSION` is 12. Persisted state includes:
+`CONTENT_VERSION` is 14. Persisted state includes:
 
 - learner profile and preferences;
 - mission statuses, debriefs, self-ratings, and derived points;
@@ -65,7 +65,7 @@ Every mission preserves this sequence:
 5. Debrief
 6. Completion criteria
 
-Missions unlock in order. Completion requires substantive debrief responses and awards five progress points. Missions 01-04 establish prompting, assumption, risk, and evaluation habits. Missions 05-12 use the embedded Field Kit for grounded review, editing, standing instructions, debugging, browser evidence, claim classification, role separation, and memory discipline. Mission 13 consolidates the campaign into reusable tradecraft.
+Missions unlock in order. Completion requires substantive debrief responses and awards five progress points, for a 90-point mandatory campaign. Missions 01-04 establish prompting, assumption, risk, and evaluation habits. Missions 05-12 use the embedded Field Kit for grounded review, editing, standing instructions, debugging, browser evidence, claim classification, role separation, and memory discipline. Missions 13-18 consolidate the campaign into reusable tradecraft and extend it to AI-specific test challenges: nondeterministic output, the oracle problem, mutation-tested coverage, prompt-injection red teaming, and response-contract enforcement.
 
 ## Evidence Boundaries
 

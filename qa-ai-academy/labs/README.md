@@ -1,6 +1,6 @@
 # Optional Authentic-Runtime Labs
 
-These labs repeat selected Field Kit exercises using authentic local runtimes. They are optional extensions: completing the embedded harnesses in `qa_ai_academy.html` satisfies the mandatory 13-mission campaign.
+These labs repeat selected Field Kit exercises using authentic local runtimes. They are optional extensions: completing the embedded harnesses in `qa_ai_academy.html` satisfies the mandatory 18-mission campaign.
 
 The Node.js and Python labs intentionally contain small defects. Their first test runs are expected to fail so the learner can practice AI-assisted diagnosis, minimal fixes, and verification.
 
@@ -11,6 +11,7 @@ The Playwright extension requires local dependencies. It can still be reviewed a
 - Node Risk Triage: Node.js with the built-in test runner.
 - Python Claim Audit: Python 3; no third-party packages are currently required.
 - Playwright Reset Flow: Node.js, npm dependencies, and Playwright-managed browser binaries.
+- JavaScript Mutation, Schema Contract, and Flaky-Triage labs: Node.js with the built-in test runner; no third-party packages.
 - VS Code is optional; `.vscode/tasks.json` provides convenience commands.
 
 Do not install any of these tools merely to finish the campaign. Use this track when authentic environment setup and command output are part of your learning goal.
@@ -29,6 +30,15 @@ Do not install any of these tools merely to finish the campaign. Use this track 
   - Run: `npm test`.
   - Purpose: use Playwright to capture a privacy requirement and limited accessibility evidence in a synthetic browser flow.
   - Boundary: the accessibility-oriented check does not establish WCAG conformance; pair it with the manual checks in `../sources/AI_TESTING_FIELD_GUIDE.md`.
+- [`js-mutation-lab`](js-mutation-lab/README.md)
+  - Run: `node --test`
+  - Purpose: strengthen weak password test cases until mutation testing kills every seeded defect (Mission 16).
+- [`js-schema-contract`](js-schema-contract/README.md)
+  - Run: `node --test`
+  - Purpose: tighten a lenient validator until it enforces a documented response contract (Mission 18).
+- [`js-flaky-triage`](js-flaky-triage/README.md)
+  - Run: `node --test`
+  - Purpose: diagnose and stabilize an order-dependent, flaky test suite (Mission 14).
 
 ## AI Use Rule
 

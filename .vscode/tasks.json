@@ -27,6 +27,33 @@
         "cwd": "${workspaceFolder}/qa-ai-academy/labs/playwright-reset-flow"
       },
       "problemMatcher": []
+    },
+    {
+      "label": "Lab: JS mutation coverage tests",
+      "type": "shell",
+      "command": "node --test",
+      "options": {
+        "cwd": "${workspaceFolder}/qa-ai-academy/labs/js-mutation-lab"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Lab: JS schema contract tests",
+      "type": "shell",
+      "command": "node --test",
+      "options": {
+        "cwd": "${workspaceFolder}/qa-ai-academy/labs/js-schema-contract"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Lab: JS flaky triage tests",
+      "type": "shell",
+      "command": "node --test",
+      "options": {
+        "cwd": "${workspaceFolder}/qa-ai-academy/labs/js-flaky-triage"
+      },
+      "problemMatcher": []
     }
   ]
 }

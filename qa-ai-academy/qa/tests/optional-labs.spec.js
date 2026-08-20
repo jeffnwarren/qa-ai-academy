@@ -9,6 +9,9 @@ const labsRoot = path.join(__dirname, '..', '..', 'labs');
 const nodeLab = path.join(labsRoot, 'node-risk-triage');
 const pythonLab = path.join(labsRoot, 'python-claim-audit');
 const browserLab = path.join(labsRoot, 'playwright-reset-flow');
+const mutationLab = path.join(labsRoot, 'js-mutation-lab');
+const schemaLab = path.join(labsRoot, 'js-schema-contract');
+const flakyLab = path.join(labsRoot, 'js-flaky-triage');
 
 function combinedOutput(result) {
   return `${result.stdout || ''}\n${result.stderr || ''}`;
@@ -166,6 +169,130 @@ test('Playwright lab exposes the privacy defect and a neutral-message repair res
   }
 });
 
+test('Mutation lab reproduces surviving mutants and passes after stronger cases', () => {
+  const initial = spawnSync(process.execPath, ['--test'], { cwd: mutationLab, encoding: 'utf8' });
+  const initialOutput = combinedOutput(initial);
+
+  expect(initial.status).toBe(1);
+  expect(initialOutput).toMatch(/tests 2/);
+  expect(initialOutput).toMatch(/pass 1/);
+  expect(initialOutput).toMatch(/fail 1/);
+  expect(initialOutput).toContain('Surviving mutants');
+
+  withTempDir('qa-academy-mutation-', directory => {
+    const repairedCases = `const cases = [
+  ['Abcdefghijk1', true],
+  ['short', false],
+  ['Abcdefg1', false],
+  ['ABCDEFGHIJK1', false],
+  ['abcdefghijk1', false],
+  ['Abcdefghijkl', false],
+];
+
+module.exports = { cases };
+`;
+    fs.writeFileSync(path.join(directory, 'passwordCases.js'), repairedCases);
+    for (const file of ['isValidPassword.js', 'mutation.js', 'mutation.test.js']) {
+      fs.copyFileSync(path.join(mutationLab, file), path.join(directory, file));
+    }
+
+    const final = spawnSync(process.execPath, ['--test'], { cwd: directory, encoding: 'utf8' });
+    const finalOutput = combinedOutput(final);
+    expect(final.status, finalOutput).toBe(0);
+    expect(finalOutput).toMatch(/pass 2/);
+    expect(finalOutput).toMatch(/fail 0/);
+  });
+});
+
+test('Schema contract lab reproduces lenient failures and passes after a stricter validator', () => {
+  const initial = spawnSync(process.execPath, ['--test'], { cwd: schemaLab, encoding: 'utf8' });
+  const initialOutput = combinedOutput(initial);
+
+  expect(initial.status).toBe(1);
+  expect(initialOutput).toMatch(/tests 7/);
+  expect(initialOutput).toMatch(/pass 1/);
+  expect(initialOutput).toMatch(/fail 6/);
+
+  withTempDir('qa-academy-schema-', directory => {
+    const repairedValidator = `function validate(response) {
+  const errors = [];
+  if (typeof response !== 'object' || response === null) {
+    return { valid: false, errors: ['response must be an object'] };
+  }
+  const allowedIntents = ['reset', 'status', 'cancel'];
+  if (!allowedIntents.includes(response.intent)) {
+    errors.push('intent must be one of reset, status, cancel');
+  }
+  if (typeof response.confidence !== 'number' || response.confidence < 0 || response.confidence > 1) {
+    errors.push('confidence must be a number between 0 and 1');
+  }
+  if (typeof response.requiresHuman !== 'boolean') {
+    errors.push('requiresHuman must be a boolean');
+  }
+  const allowedKeys = ['intent', 'confidence', 'requiresHuman'];
+  for (const key of Object.keys(response)) {
+    if (!allowedKeys.includes(key)) errors.push('unexpected property: ' + key);
+  }
+  return { valid: errors.length === 0, errors };
+}
+
+module.exports = { validate };
+`;
+    fs.writeFileSync(path.join(directory, 'validateResponse.js'), repairedValidator);
+    fs.copyFileSync(path.join(schemaLab, 'schema.test.js'), path.join(directory, 'schema.test.js'));
+
+    const final = spawnSync(process.execPath, ['--test'], { cwd: directory, encoding: 'utf8' });
+    const finalOutput = combinedOutput(final);
+    expect(final.status, finalOutput).toBe(0);
+    expect(finalOutput).toMatch(/pass 7/);
+    expect(finalOutput).toMatch(/fail 0/);
+  });
+});
+
+test('Flaky-triage lab reproduces order-dependent failure and passes after isolating state', () => {
+  const initial = spawnSync(process.execPath, ['--test'], { cwd: flakyLab, encoding: 'utf8' });
+  const initialOutput = combinedOutput(initial);
+
+  expect(initial.status).toBe(1);
+  expect(initialOutput).toMatch(/tests 3/);
+  expect(initialOutput).toMatch(/pass 1/);
+  expect(initialOutput).toMatch(/fail 2/);
+
+  withTempDir('qa-academy-flaky-', directory => {
+    const repairedTest = `const test = require('node:test');
+const assert = require('node:assert/strict');
+const { RetryQueue } = require('./retryQueue');
+
+test('adds a single job', () => {
+  const queue = new RetryQueue();
+  queue.add('job-1');
+  assert.equal(queue.size, 1);
+});
+
+test('adds two more jobs', () => {
+  const queue = new RetryQueue();
+  queue.add('job-2');
+  queue.add('job-3');
+  assert.equal(queue.size, 2);
+});
+
+test('drains only its own queued job', () => {
+  const queue = new RetryQueue();
+  queue.add('job-4');
+  assert.equal(queue.drain(), 1);
+});
+`;
+    fs.writeFileSync(path.join(directory, 'flaky.test.js'), repairedTest);
+    fs.copyFileSync(path.join(flakyLab, 'retryQueue.js'), path.join(directory, 'retryQueue.js'));
+
+    const final = spawnSync(process.execPath, ['--test'], { cwd: directory, encoding: 'utf8' });
+    const finalOutput = combinedOutput(final);
+    expect(final.status, finalOutput).toBe(0);
+    expect(finalOutput).toMatch(/pass 3/);
+    expect(finalOutput).toMatch(/fail 0/);
+  });
+});
+
 test('optional lab guides state setup, expected evidence, reset, and safety boundaries', () => {
   const guides = [
     {
@@ -179,6 +306,18 @@ test('optional lab guides state setup, expected evidence, reset, and safety boun
     {
       path: path.join(browserLab, 'README.md'),
       expected: ['Optional Authentic-Runtime Guide', '1-pass/1-fail', '2 passing and 0 failing'],
+    },
+    {
+      path: path.join(mutationLab, 'README.md'),
+      expected: ['Optional Authentic-Runtime Guide', 'all four seeded mutants surviving', 'every seeded mutant is killed'],
+    },
+    {
+      path: path.join(schemaLab, 'README.md'),
+      expected: ['Optional Authentic-Runtime Guide', 'six of seven cases failing', 'all seven cases passing'],
+    },
+    {
+      path: path.join(flakyLab, 'README.md'),
+      expected: ['Optional Authentic-Runtime Guide', 'order-dependent failure (1 pass, 2 fail)', 'all three tests passing'],
     },
   ];
 

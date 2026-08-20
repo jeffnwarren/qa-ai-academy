@@ -13,7 +13,7 @@ Maintainer manual test checklist for `qa_ai_academy.html`.
 
 ## Documentation Consistency
 
-- Confirm `README.md` labels the single-HTML Missions 01-13 route mandatory and the repository runtime labs optional.
+- Confirm `README.md` labels the single-HTML Missions 01-18 route mandatory and the repository runtime labs optional.
 - Confirm `DESIGN.md`, `CONSTITUTION.md`, `sources.md`, and all lab READMEs use the same mandatory-versus-optional distinction.
 - Confirm Mission 05 is named "Embedded Field Kit" everywhere it is mapped.
 - Confirm documentation points to `AGENTS.md` and embedded `case/standing-orders.md`; no document requires a nonexistent `.github/copilot-instructions.md`.
@@ -24,7 +24,7 @@ Maintainer manual test checklist for `qa_ai_academy.html`.
 - Open the HTML file in a browser with no existing `qa_ai_academy_v1` or legacy `icon_dossier_v1` local storage.
 - Seed a valid legacy `icon_dossier_v1` save, reload, and confirm it migrates to `qa_ai_academy_v1` without losing progress.
 - Confirm Dossier tab loads by default.
-- Confirm clearance shows `d4`, points show `0`, Mission 01 is enabled, and Missions 02-13 are locked.
+- Confirm clearance shows `d4`, points show `0`, Mission 01 is enabled, and Missions 02-18 are locked.
 - Confirm Options drawer opens and closes.
 - Confirm Field Kit opens, lists embedded case and lab files, and displays `case/README.md` by default.
 - Confirm Campaign style defaults to Story, can switch to Direct, migrates older RPG/Manual saves, and updates mission briefings when a mission is open.
@@ -49,16 +49,16 @@ Maintainer manual test checklist for `qa_ai_academy.html`.
 - Enter short text under 12 characters in each debrief and confirm completion remains disabled.
 - Enter useful answers in all debrief fields and confirm completion becomes enabled.
 - Complete Mission 01 and confirm points increase to `5` and Mission 02 unlocks.
-- Repeat for Missions 02-13.
+- Repeat for Missions 02-18.
 - Confirm Mission 05 appears after the d4 intro arc and the roster continues through d12.
 - Confirm completing a mission twice does not double-award points.
 - Confirm a completed mission remains readable after reload.
 - Confirm mission completion offers a direct route to the newly unlocked
-  mission and Mission 13 returns to the dossier.
+  mission and Mission 18 returns to the dossier.
 
 ## Optional Advanced Modules
 
-- Confirm all eight modules remain available without changing mission locks or
+- Confirm all thirteen modules remain available without changing mission locks or
   points.
 - Confirm every module preserves Objective, Concept, Hands-on exercise, Failure
   mode, Debrief, and Completion criteria.
@@ -75,13 +75,14 @@ Maintainer manual test checklist for `qa_ai_academy.html`.
 - Confirm hallucination, assumptions, verification, and human ownership are reinforced across the arc.
 - Confirm Mission 03 classifies five packets and applies practical risk tags without presenting them as compliance verdicts.
 - Confirm Mission 04 creates an evaluation record and asks for either two-run comparison or a documented comparison procedure.
-- Confirm Missions 05-12 can be completed with the embedded Field Kit and clearly label VS Code, Node.js, Python, and Playwright as optional extension tooling.
+- Confirm Missions 05-18 can be completed with the embedded Field Kit and clearly label VS Code, Node.js, Python, and Playwright as optional extension tooling.
 - Confirm break/fix labs are labeled as intentionally failing before repair.
 - Confirm first-play guidance recommends Missions 01-04 before the embedded workbench missions.
 - Confirm the optional Python extension guidance recommends `venv` and tells the learner to ask AI for setup help using command output.
 - Confirm Mission 12 covers pre-session, in-session, and post-session memory/documentation workflow.
 - Confirm Mission 11 treats embedded instructions as untrusted source text and keeps tool use, publication, and risk acceptance under human control.
-- Confirm Mission 13 remains the final Tradecraft Journal capstone and includes a two-source provenance ledger.
+- Confirm Mission 13 remains the Tradecraft Journal capstone with a two-source provenance ledger, and that Missions 14-18 extend the d12 arc through nondeterministic output, the oracle problem, mutation-tested coverage, prompt-injection red teaming, and response-contract enforcement.
+- Confirm Mission 18 remains the final mission and returns to the dossier on completion.
 - Confirm `AI_SESSION_MEMORY_PROTOCOL.md` gives reusable prompts and handoff templates.
 - Confirm `sources/AI_TESTING_FIELD_GUIDE.md` includes canonical ISTQB, NIST, OWASP, W3C, and Playwright references with an access date.
 
@@ -91,6 +92,8 @@ Maintainer manual test checklist for `qa_ai_academy.html`.
 - Run the browser evidence harness and confirm three inspected DOM-semantics checks pass while both privacy checks fail (`3/5`).
 - Temporarily remove the reset label, button name, and result-region live/status semantics one at a time; confirm the corresponding semantic check fails, then restore the markup.
 - Run the Python-equivalent harness and confirm the initial rules pass 2/5 controlled cases.
+- Run the mutation coverage check (Mission 16) and confirm the starter password cases leave at least one seeded mutant surviving until the cases are strengthened.
+- Run the response contract check (Mission 18) and confirm the lenient starter validator wrongly accepts invalid responses until it is tightened.
 - Confirm each harness reports its boundary and never presents itself as a complete Node, Python, Playwright, accessibility, or semantic-analysis runtime.
 - Confirm editable JavaScript runs only in a temporary `sandbox="allow-scripts"` opaque-origin frame and that the frame is removed after result, error, or timeout.
 - Try synthetic probes for `parent.document`, `localStorage`, and `fetch`; confirm they cannot reach Academy data or complete a network result.
@@ -102,6 +105,9 @@ Maintainer manual test checklist for `qa_ai_academy.html`.
 - Confirm each optional guide covers official installation links, version checks, working directory, expected initial result, repair loop, final result, troubleshooting, reset, and completion criteria.
 - Confirm the Playwright guide includes the separate `npx playwright install chromium` browser step and authorized Linux `--with-deps` boundary.
 - Run `node --test` in `labs/node-risk-triage` and confirm the first run fails with a ranking-related assertion.
+- Run `node --test` in `labs/js-mutation-lab` and confirm the first run fails with all four seeded mutants surviving, then passes after stronger synthetic cases are added.
+- Run `node --test` in `labs/js-schema-contract` and confirm the first run fails six of seven cases, then passes after the validator enforces the full contract.
+- Run `node --test` in `labs/js-flaky-triage` and confirm the first run fails two of three cases from shared state, then passes after each test is isolated.
 - Run `python -m unittest` in `labs/python-claim-audit` and confirm the first run fails because unsupported claims are classified too broadly.
 - Inspect `labs/playwright-reset-flow` and confirm its README says `npm install` is required before `npm test`.
 - Inspect the Playwright spec and confirm it contains a passing named-controls/status check plus the intentionally failing privacy check.
@@ -146,7 +152,7 @@ Maintainer manual test checklist for `qa_ai_academy.html`.
 - Canonical repository file: `qa-ai-academy/qa_ai_academy.html`.
 - Canonical project URL: `https://jeffnwarren.github.io/qa-ai-academy/qa-ai-academy/qa_ai_academy.html`.
 - Confirm both root landing-page actions use `qa-ai-academy/qa_ai_academy.html` with matching path casing.
-- After deployment, open Options and confirm **Academy content version 13** appears. Use a private window or cache-busting query if comparing deployments, but first verify the served URL and page source.
+- After deployment, open Options and confirm **Academy content version 14** appears. Use a private window or cache-busting query if comparing deployments, but first verify the served URL and page source.
 - Confirm the separate `labs/playwright-reset-flow/index.html` remains an optional lab rather than a duplicate Academy deployment.
 
 ## Reset

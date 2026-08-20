@@ -116,6 +116,21 @@ Primary learner persona: a manual or software tester learning practical AI workf
 - Mission 13, "Tradecraft Journal"
   - AI concepts: prompt recipes, personal checklist, source provenance, risk tags, evaluation records, stop rules.
   - RPG function: d12 capstone and personal playbook.
+- Mission 14, "Two Rolls, Two Answers"
+  - AI concepts: sampling and nondeterminism, temperature/top-p, cosmetic versus behavioral variance, property-based acceptance rules, single-run risk.
+  - RPG function: testing a target that will not hold still.
+- Mission 15, "The Oracle Trap"
+  - AI concepts: the oracle problem, circular validation, requirement-derived expectations, independent test design.
+  - RPG function: refusing a suspect's self-issued alibi.
+- Mission 16, "Coverage Mirage"
+  - AI concepts: line coverage versus mutation testing, seeded defects, surviving mutants, strengthening weak cases, AI-suggested cases as drafts.
+  - RPG function: seeding defects to expose blind spots.
+- Mission 17, "Red Team Recon"
+  - AI concepts: direct and indirect prompt injection, untrusted connected content, adversarial probing, held defenses versus residual manual checks.
+  - RPG function: probing the machine like an adversary before trusting it.
+- Mission 18, "Contract Enforcement"
+  - AI concepts: structured-output contracts, parsing versus validating, required fields, types, ranges, extra-property rejection, review of AI-suggested validators.
+  - RPG function: enforcing the shape of every reply; final mission.
 
 ## Lab Mapping
 
@@ -127,6 +142,16 @@ The dossier embeds the mandatory campaign versions of these exercises. The direc
   - Supports Mission 09 with an intentionally broken synthetic password-reset browser flow.
 - `labs/python-claim-audit`
   - Supports Mission 10 with an intentionally naive Python evidence classifier.
+- `labs/js-mutation-lab`
+  - Supports Mission 16 with a password-rule implementation and deliberately weak
+    cases that leave seeded mutants surviving until the cases are strengthened.
+- `labs/js-schema-contract`
+  - Supports Mission 18 with a documented response contract and a lenient
+    validator that must be tightened to enforce types, ranges, and extra-property
+    rejection.
+- `labs/js-flaky-triage`
+  - Reinforces Mission 14 with an intentionally flaky Node.js test whose root
+    cause the learner must diagnose and stabilize.
 
 ## Optional Advanced Module Mapping
 
@@ -146,6 +171,16 @@ The dossier embeds the mandatory campaign versions of these exercises. The direc
   reproduction, and causal-claim limits.
 - Model and Tool Selection: evidence-driven choice across deterministic,
   browsing, retrieval, image, and coding-agent capabilities.
+- Golden Eval Set: repeatable prompt regression, fixed inputs and expectations,
+  and drift detection across model or prompt changes.
+- Test Data and PII Boundaries: synthetic data generation, boundary and
+  equivalence drafts, and never seeding fixtures from real records.
+- Hallucinated Dependencies: supply-chain verification of AI-suggested packages
+  against official registries before trust or installation.
+- Reproducible Bug Reports: AI-drafted, human-verified defects with exact steps,
+  evidence, and environment detail.
+- When Not to Use AI: cost, latency, and risk gating that keeps deterministic or
+  human paths when they are the better choice.
 
 ## Memory And Documentation Mapping
 

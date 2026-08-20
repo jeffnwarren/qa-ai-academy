@@ -23,7 +23,7 @@ Example:
 
 ```text
 Objective: Add one curriculum mission about AI memory and documentation.
-Current evidence: qa_ai_academy.html has Missions 01-13; sources.md maps mission concepts.
+Current evidence: qa_ai_academy.html has Missions 01-18; sources.md maps mission concepts.
 Relevant files or docs: qa_ai_academy.html, README.md, TEST_NOTES.md, sources.md.
 Constraints and safety boundaries: Use synthetic examples only. Do not remove existing missions. Preserve save migration.
 Verification command or review method: Parse the dossier script, check JSON files, review mission roster references.

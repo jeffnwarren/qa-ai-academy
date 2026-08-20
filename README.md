@@ -12,7 +12,7 @@ The main artifact is:
 
 - `qa-ai-academy/qa_ai_academy.html`
 
-Open that file in a browser to use QA-AI Academy. It is a self-contained field kit for all 13 missions: curriculum references, editable case files, and dependency-free lab harnesses are embedded in the HTML. Progress, working files, field notes, and debrief answers are saved in local browser storage.
+Open that file in a browser to use QA-AI Academy. It is a self-contained field kit for all 18 missions: curriculum references, editable case files, and dependency-free lab harnesses are embedded in the HTML. Progress, working files, field notes, and debrief answers are saved in local browser storage.
 
 ## Mandatory Campaign Path
 
@@ -21,7 +21,7 @@ The mandatory campaign requires only `qa-ai-academy/qa_ai_academy.html` and acce
 1. Upload the dossier HTML to the chatbot for curriculum and case-file context.
 2. Send the AI Learning Guide prompt shown in the dossier.
 3. Open the same HTML file in a browser for the interactive campaign, saved progress, Field Kit, and lab consoles.
-4. Complete Missions 01-13 in order. Missions 01-04 establish the core judgment habits; Missions 05-12 use the embedded case files and dependency-free lab harnesses; Mission 13 consolidates the work into a personal playbook.
+4. Complete Missions 01-18 in order. Missions 01-04 establish the core judgment habits; Missions 05-12 use the embedded case files and dependency-free lab harnesses; Mission 13 consolidates the work into a personal playbook; Missions 14-18 extend it to nondeterministic output, the oracle problem, mutation-tested coverage, prompt-injection red teaming, and response-contract enforcement.
 
 Completing the embedded versions satisfies the full campaign. Node.js, Python, Playwright, VS Code, and a local copy of this repository are not required.
 
@@ -37,6 +37,7 @@ Campaign style defaults to Story briefings. Use Options -> Campaign style -> Dir
 - Requirement-first privacy and bounded accessibility evidence, with optional authentic Playwright repetition.
 - Threat-informed planner/reviewer patterns and reusable prompt journaling.
 - Memory and documentation practices that keep AI aligned with objectives before, during, and after a session.
+- AI-specific test challenges: nondeterministic output, the oracle problem, mutation-tested coverage, prompt-injection red teaming, and response-contract enforcement.
 
 ## Optional Authentic-Runtime Extensions
 
@@ -54,8 +55,8 @@ VS Code task definitions are included in `.vscode/tasks.json` for running the la
 
 ## Optional Advanced Field Modules
 
-The standalone Academy also includes eight optional modules under the
-**Advanced** tab. They do not affect the 13 mandatory missions or campaign
+The standalone Academy also includes thirteen optional modules under the
+**Advanced** tab. They do not affect the 18 mandatory missions or campaign
 points:
 
 - supervised coding-agent work with Codex, VS Code, or another coding agent;
@@ -65,7 +66,12 @@ points:
 - a synthetic issue-to-PR evidence loop;
 - multimodal screenshot review with browser verification;
 - synthetic QA-data analysis with deterministic metric checks;
-- evidence-driven model and tool selection.
+- evidence-driven model and tool selection;
+- a repeatable golden eval set for prompt regression;
+- synthetic test data within PII boundaries;
+- supply-chain checks for hallucinated dependencies;
+- AI-drafted, human-verified reproducible bug reports;
+- cost, latency, and risk gating for when not to use AI.
 
 Codex is used as one concrete implementation, not as the learning objective.
 Product-specific controls and availability may change; the modules teach
