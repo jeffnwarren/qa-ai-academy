@@ -54,6 +54,24 @@ or product-specific work should remain optional.
     - maximum text-size layout;
     - dark/light theme persistence.
 
+- [ ] Add a campaign-level "Outcomes and Boundaries" block at the intro and the
+  completion/review screen.
+  - Learning reason: the course clearly states what completion is *not* (not a
+    certification of mastery), but never states, at the campaign level, the
+    real-world capabilities a learner has practiced. A concise, honestly framed
+    outcomes statement aids motivation and transfer without overclaiming.
+  - Affected: onboarding/intro copy and the `Review completed campaign` screen in
+    `qa-ai-academy/qa_ai_academy.html`, plus a matching "Outcomes" section in
+    `README.md`.
+  - Content: pair "You can now" (capabilities: risk triage, evaluation records,
+    hallucinated-dependency checks, response-contract enforcement, prompt-injection
+    red teaming, human-over-AI judgment) with "This does not" (no certification,
+    no ISTQB/on-the-job-assessment replacement, no qualified-specialist claim).
+  - Guardrail: keep it capability-framed, not credential-framed, and next to the
+    existing non-certification disclaimer.
+  - Verify: confirm the block renders at intro and completion, reads modestly,
+    and the non-certification wording remains intact.
+
 ## Candidate Optional Advanced Modules
 
 - [x] Supervised coding-agent workflow with Codex and VS Code.
