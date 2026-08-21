@@ -72,6 +72,23 @@ or product-specific work should remain optional.
   - Verify: confirm the block renders at intro and completion, reads modestly,
     and the non-certification wording remains intact.
 
+- [ ] De-emphasize the shared case-file picker in the intro missions (m1-m4).
+  - Learning reason: the "Copy selected case files" checklist (case/README.md,
+    case/standing-orders.md, case/field-guide.md, and the lab files) renders in
+    every mission's Hands-on section via the shared `missionShell`, but the case
+    files are not used until Mission 05 "Embedded Field Kit." Showing the full
+    picker in "First Contact" can confuse a first-time learner about where those
+    files come from.
+  - Affected: the `evidence-actions` toolbar and `.case-file-select` block in
+    `missionShell` in `qa-ai-academy/qa_ai_academy.html`.
+  - Options: hide the case-file checklist (and/or "Copy selected case files")
+    for m1-m4 and introduce it at m5; or keep it but add a one-line hint that
+    case files are read in the Field Kit and become central at Mission 05.
+  - Guardrail: keep "Copy mission briefing for AI" available in every mission;
+    do not break the standalone completion path or existing tests.
+  - Verify: confirm m1-m4 no longer show the premature picker (or show the hint),
+    m5+ still show it, and the Playwright suite passes.
+
 ## Candidate Optional Advanced Modules
 
 - [x] Supervised coding-agent workflow with Codex and VS Code.
