@@ -461,6 +461,21 @@ test('token demo is offline and learning report escapes learner markup', async (
   expect(report).toContain('not a certification or independent assessment');
 });
 
+test('Mission 01 Activity C opens a copyable synthetic sample spec in a new tab', async ({ page, context }) => {
+  await openMissions(page);
+  await page.locator('#item-m1').click();
+  const [popup] = await Promise.all([
+    context.waitForEvent('page'),
+    page.getByRole('button', { name: 'Open a copyable sample spec' }).click(),
+  ]);
+  await popup.waitForLoadState();
+  await expect(popup.getByRole('button', { name: 'Copy to clipboard' })).toBeVisible();
+  const spec = await popup.locator('#spec').inputValue();
+  expect(spec).toContain('exactly 27 minutes');
+  expect(spec).toContain('America/Winnipeg');
+  await expect(page.locator('#sample-spec-feedback')).toContainText('new tab');
+});
+
 test('Evidence Board links and filters mission records with a human decision', async ({ page }) => {
   await page.getByRole('tab', { name: 'Evidence' }).click();
   await page.locator('#evidence-title').fill('Synthetic privacy observation');

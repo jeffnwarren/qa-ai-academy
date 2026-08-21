@@ -8,3 +8,4 @@ test-results/
 
 # Private commercial source books; retain citations and original notes only.
 qa-ai-academy/sources/*.pdf
+.DS_Store

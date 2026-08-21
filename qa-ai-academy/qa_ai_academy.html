@@ -2976,6 +2976,125 @@ function missionShell(mission) {
   `;
 }
 
+// Synthetic sample requirements spec for Mission 01 Activity C (context-window stress).
+const MISSION1_SAMPLE_SPEC = `SOFTWARE REQUIREMENTS SPECIFICATION
+Product: "Meadowlark" Account Recovery & Notifications Service (FICTIONAL)
+Version: 0.9-draft • Status: synthetic sample for training only
+
+1. Purpose
+Meadowlark is a fictional self-service account-recovery and notifications
+platform for the imaginary "Harbor Ledger" banking sandbox. This document is
+entirely synthetic and describes no real system, company, or customer.
+
+2. Scope
+Meadowlark covers three capabilities: (a) password reset via email one-time
+links, (b) multi-channel notifications (email, SMS, in-app), and (c) an admin
+audit console. Payments, KYC, and core ledger functions are out of scope.
+
+3. Definitions
+- Recovery Token: a single-use, time-boxed credential used to reset a password.
+- Quiet Hours: a per-user window during which only critical alerts are sent.
+- Digest: a batched summary notification sent on a schedule.
+
+4. User Roles
+4.1 Member — an end user who can request recovery and manage notification preferences.
+4.2 Support Agent — read-only access to recovery events, no token values.
+4.3 Auditor — read-only access to the immutable audit log.
+4.4 Admin — can configure templates and thresholds but cannot read token values.
+
+5. Password Recovery Requirements
+5.1 A Member submits an email address to request recovery.
+5.2 The system MUST return an identical response whether or not the address is
+registered (no account enumeration).
+5.3 A Recovery Token MUST be single-use and expire 20 minutes after issue.
+5.4 A used or expired token MUST return a neutral "link no longer valid" message.
+5.5 New password MUST be 12+ chars with upper, lower, and a digit.
+5.6 On successful reset, all active sessions for that Member MUST be revoked.
+
+6. Notification Channels
+6.1 Email is the default channel and MUST always be available.
+6.2 SMS is opt-in and MUST degrade gracefully to email on carrier failure.
+6.3 In-app notifications MUST persist for 30 days, then auto-archive.
+
+7. Notification Preferences
+7.1 Members can mute non-critical categories individually.
+7.2 Quiet Hours suppress all non-critical notifications.
+7.3 Critical security alerts (e.g., password changed) MUST ignore Quiet Hours.
+
+8. Rate Limiting & Abuse Controls
+8.1 Recovery requests are limited per address and per source IP.
+8.2 Repeated failures trigger a temporary cooldown (see section 11).
+8.3 All limiting MUST fail closed if the limiter service is unavailable.
+
+9. Audit & Logging
+9.1 Every recovery event MUST be written to an append-only audit log.
+9.2 Token values MUST NEVER appear in logs, only opaque event IDs.
+9.3 Audit entries MUST include actor, action, result, and UTC timestamp.
+
+10. Accessibility & Localization
+10.1 All recovery screens MUST meet keyboard-only operation.
+10.2 Status messages MUST expose programmatic status semantics.
+10.3 Templates MUST support at least English and Spanish at launch.
+
+11. Security Thresholds (SPECIFIC VALUES)
+11.1 Account lockout threshold: 5 failed recovery attempts within 15 minutes.
+11.2 Lockout cooldown: exactly 27 minutes before the next attempt is allowed.
+11.3 SMS one-time codes: 6 digits, valid for 4 minutes, max 3 resends.
+11.4 Admins can raise (never lower) the lockout threshold, capped at 10.
+
+12. Scheduled Digests (FINAL SECTION)
+12.1 The weekly security digest is generated every Sunday at 06:15 in the
+"America/Winnipeg" timezone, regardless of the Member's local timezone.
+12.2 The digest batches up to 50 events; overflow rolls to the next digest.
+12.3 If a Member has zero events, the digest is suppressed (no empty email).
+12.4 Digest delivery failures retry twice, then raise an internal alert ticket
+prefixed "MDL-DIGEST-".`;
+
+const SAMPLE_SPEC_PAGE = `<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mission 01 — Sample Spec (synthetic)</title>
+<style>
+  body{margin:0;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:#0d0f0e;color:#c8d4c9;line-height:1.5}
+  .wrap{max-width:820px;margin:0 auto;padding:20px}
+  h1{font-size:1.05rem;color:#e8f0e9;margin:0 0 6px}
+  p{color:#8a9a8b;font-size:.9rem;margin:6px 0}
+  .bar{display:flex;gap:10px;align-items:center;margin:12px 0}
+  button{font:inherit;background:#2d6b42;color:#fff;border:1px solid #3d4a3e;border-radius:6px;padding:8px 14px;cursor:pointer}
+  #msg{font-size:.85rem;color:#4caf6e}
+  textarea{width:100%;height:68vh;box-sizing:border-box;background:#141716;color:#c8d4c9;border:1px solid #2a2e2b;border-radius:6px;padding:12px;font-family:Consolas,'Courier New',monospace;font-size:.85rem}
+</style></head>
+<body><div class="wrap">
+  <h1>Mission 01 · Activity C — Sample Spec (entirely synthetic)</h1>
+  <p>Copy this into your AI chat, ask it to summarize the final section, then quiz it on a specific value near the end (for example the 27-minute lockout cooldown or the 06:15 America/Winnipeg digest time). Watch whether detail quality drops.</p>
+  <div class="bar"><button type="button" onclick="copySpec()">Copy to clipboard</button><span id="msg" role="status" aria-live="polite"></span></div>
+  <textarea id="spec" readonly aria-label="Synthetic sample spec"></textarea>
+</div>
+<script>
+function copySpec(){
+  var ta=document.getElementById('spec'); ta.focus(); ta.select();
+  try{ ta.setSelectionRange(0, ta.value.length); }catch(e){}
+  function done(ok){ document.getElementById('msg').textContent = ok ? 'Copied.' : 'Copy failed — select the text and copy manually.'; }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(ta.value).then(function(){done(true);}, function(){ var ok=false; try{ok=document.execCommand('copy');}catch(e){} done(ok); });
+  } else { var ok=false; try{ok=document.execCommand('copy');}catch(e){} done(ok); }
+}
+<\/script>
+</body></html>`;
+
+function openSampleSpec() {
+  const feedback = document.getElementById('sample-spec-feedback');
+  const win = window.open('', '_blank');
+  if (!win) {
+    if (feedback) feedback.textContent = 'Popup blocked. Allow popups for this page, or open samples/context-window-sample-spec.md from the repository.';
+    return;
+  }
+  win.document.write(SAMPLE_SPEC_PAGE);
+  win.document.close();
+  const area = win.document.getElementById('spec');
+  if (area) area.value = MISSION1_SAMPLE_SPEC;
+  if (feedback) feedback.textContent = 'Opened a synthetic sample spec in a new tab.';
+}
+
 function buildMission1() {
   return missionShell({
     id: 'm1',
@@ -3037,6 +3156,9 @@ For each one, give a one-line example of what could go wrong.</div>
     <div class="activity-block">
       <div class="act-label">Activity C &#8212; Stress the context window</div>
       <p>Use only synthetic, public, or explicitly approved non-sensitive text. Paste a long fake requirement or sample spec into a chat and ask the AI to summarize the last section. Then ask about a detail near the end. Notice whether detail quality drops.</p>
+      <p>No spec handy? Open a ready-made synthetic one in a new tab and copy it into your chat.</p>
+      <button class="save-btn" type="button" onclick="openSampleSpec()">Open a copyable sample spec</button>
+      <span id="sample-spec-feedback" class="helper-text" role="status" aria-live="polite"></span>
     </div>`,
     failureMode: '<strong>Automation bias:</strong> the output sounds polished, so you stop testing the output. Your countermeasure is to keep asking: what was assumed, what was omitted, and what evidence would confirm this?',
     questions: [
